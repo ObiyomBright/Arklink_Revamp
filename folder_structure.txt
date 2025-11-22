@@ -1,0 +1,42 @@
+/client
+│
+├── /assets
+│   ├── /css
+│   │   ├── base.css
+│   │   ├── layout.css
+│   │   ├── components.css
+│   │   └── utilities.css
+│   │
+│   ├── /js
+│   │   ├── main.js
+│   │   ├── fetchApi.js
+│   │   ├── validation.js
+│   │   └── cart.js
+│   │
+│   ├── /images
+│   │   ├── /products
+│   │   ├── /banners
+│   │   └── /icons
+│   │
+│   └── /fonts
+│
+├── /components
+│   ├── header.html
+│   ├── footer.html
+│   ├── product-card.html
+│   └── category-card.html
+│
+├── /pages
+│   ├── index.html
+│   ├── products.html
+│   ├── product-details.html
+│   ├── cart.html
+│   ├── checkout.html
+│   ├── about.html
+│   ├── contact.html
+│   └── login.html
+│
+├── /data
+│   └── categories.json
+│
+└── README.md

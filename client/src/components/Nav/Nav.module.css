@@ -1,108 +1,139 @@
 /* Color Palette */
 :root {
-  --bg: #FAFAF7;
-  --text: #2B2B2B;
-  --card: #F2EDE6;
-  --border: #E3E7EA;
-  --btn: #00246B;
-  --hover: #1A3A8C;
-  --footer: #0B0B0D;
+    --bg: #FAFAF7;
+    --text: #2B2B2B;
+    --card: #F2EDE6;
+    --border: #E3E7EA;
+    --btn: #00246B;
+    --hover: #1A3A8C;
+    --footer: #0B0B0D;
 }
 
 .navbar {
-  width: 100%;
-  background: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.2rem 2rem;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+    width: 100%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2rem;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
+/* .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    mix-blend-mode: multiply;
+
+}
+
+.logoImage {
+    width: 4rem;
+    height: 4rem;
+} */
+
 .logo a {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--btn);
-  text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--btn);
+    text-decoration: none;
 }
 
 .navLinks {
-  display: flex;
-  gap: 2rem;
-  list-style: none;
+    display: flex;
+    gap: 2rem;
+    list-style: none;
 }
 
 .navLinks a {
-  text-decoration: none;
-  color: var(--text);
-  font-weight: 500;
-  transition: color 0.3s ease;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .navLinks a:hover {
-  color: var(--hover);
-}
-
-.cart {
-  font-size: 1.2rem;
+    color: var(--hover);
 }
 
 .menuBtn {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.7rem;
-  cursor: pointer;
-  color: var(--btn);
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.7rem;
+    cursor: pointer;
+    color: var(--btn);
+}
+
+.closeBtn {
+    display: flex;
+    justify-self: right;
+    background: none;
+    border: none;
+    color: var(--btn);
+    font-size: 1.8rem;
+    cursor: pointer;
+    align-self: flex-end;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
 }
 
 /* Mobile Menu */
 .mobileMenu {
-  position: fixed;
-  top: 0;
-  right: -70%;
-  height: 100vh;
-  width: 70%;
-  background: var(--bg);
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  padding-top: 5rem;
-  padding-left: 2rem;
-  transition: right 0.35s ease;
+    position: fixed;
+    top: 0;
+    right: -70%;
+    height: 100vh;
+    width: 65%;
+    background: var(--bg);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    padding-top: 1rem;
+    /* padding-left: 2rem; */
+    transition: right 0.35s ease;
 }
 
 .showMenu {
-  right: 0;
+    right: 0;
 }
 
 .mobileMenu ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    /* gap: 1.5rem; */
+}
+
+.mobileMenu li {
+    padding: 1rem 1.5rem;
+}
+
+.mobileMenu li:hover {
+    background-color: var(--btn);
+    cursor: pointer;
+}
+
+.mobileMenu li:hover a {
+        color: var(--bg);
 }
 
 .mobileMenu a {
-  text-decoration: none;
-  color: var(--text);
-  font-size: 1.3rem;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.mobileMenu a:hover {
-  color: var(--hover);
+    text-decoration: none;
+    color: var(--text);
+    font-size: 1.3rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .navLinks {
-    display: none;
-  }
+    .navLinks {
+        display: none;
+    }
 
-  .menuBtn {
-    display: block;
-  }
+    .menuBtn {
+        display: block;
+    }
 }

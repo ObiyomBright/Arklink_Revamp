@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "./Nav.module.css";
-import { FiMenu, FiX, FiShoppingCart } from "react-icons/fi";
+// import Logo from '../../assets/logo1.png';
+import { FaTimes, FaBars } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Nav() {
@@ -21,17 +22,18 @@ export default function Nav() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
-        <Link to="/">Lofloxy</Link>
+        {/* <img src={Logo} alt="logo" className={styles.logoImage}/> */}
+        <Link to="">Lofloxy</Link>
       </div>
 
       {/* Desktop Links */}
       <ul className={styles.navLinks}>
         <li><Link to="/">Home</Link></li>
-        <li><Link to="/tiles">Tiles</Link></li>
-        <li><Link to="/sanitary-wares">Sanitary Wares</Link></li>
-        <li><Link to="/about-us">About Us</Link></li>
-        <li><Link to="/staff-login">Staff Login</Link></li>
-        <li><Link to="/cart" className={styles.cart}><FiShoppingCart /></Link></li>
+        <li><Link to="">Tiles</Link></li>
+        <li><Link to="">Sanitary Wares</Link></li>
+        <li><Link to="">About Us</Link></li>
+        <li><Link to="/login">Staff Login</Link></li>
+        <li><Link to="">Cart</Link></li>
       </ul>
 
       {/* Mobile Menu Button */}
@@ -40,7 +42,7 @@ export default function Nav() {
         onClick={() => setOpen(!open)}
         aria-label="Toggle Menu"
       >
-        {open ? <FiX /> : <FiMenu />}
+        <FaBars />
       </button>
 
       {/* Mobile Slide-In Menu */}
@@ -48,13 +50,22 @@ export default function Nav() {
         ref={menuRef}
         className={`${styles.mobileMenu} ${open ? styles.showMenu : ""}`}
       >
+        {/* Close Button */}
+        <button
+          className={styles.closeBtn}
+          onClick={() => setOpen(false)}
+          aria-label="Close Menu"
+        >
+          <FaTimes size={25} />
+        </button>
+
         <ul>
           <li onClick={() => setOpen(false)}><Link to="/">Home</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="/tiles">Tiles</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="/sanitary-wares">Sanitary Wares</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="/about-us">About Us</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="/staff-login">Staff Login</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="/cart">Cart</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="">Tiles</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="">Sanitary Wares</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="">About Us</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="/login">Staff Login</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="">Cart</Link></li>
         </ul>
       </div>
     </nav>

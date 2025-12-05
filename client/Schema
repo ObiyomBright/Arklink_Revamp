@@ -1,0 +1,41 @@
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,               
+    full_name VARCHAR(120) NOT NULL,                
+    phone VARCHAR(11) UNIQUE NOT NULL,               
+    password_hash VARCHAR(255) NOT NULL,             
+        role ENUM('customer','staff','admin') 
+         DEFAULT 'customer',                         
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP       
+);
+
+CREATE TABLE tiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    company VARCHAR(50) NOT NULL,
+    surface_type ENUM('matt','glazed','super polished') NOT NULL,
+    size VARCHAR(10) NOT NULL,
+    pieces_per_carton INT NOT NULL,
+    sqm_per_carton DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sanitary (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    company VARCHAR(50) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE product_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_type ENUM('tile','sanitary') NOT NULL,
+    product_id INT NOT NULL,
+    local_url VARCHAR(500) NOT NULL,
+    cdn_url VARCHAR(500) DEFAULT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX(product_type),
+    INDEX(product_id)
+);

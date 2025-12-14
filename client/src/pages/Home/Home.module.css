@@ -1,0 +1,8 @@
+/* container for sections */
+.container{
+  max-width: 1200px;
+  margin: 2.2rem auto;
+  padding: 0 1rem;
+  display: grid;
+  gap: 2.2rem;
+}

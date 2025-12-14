@@ -1,0 +1,90 @@
+.pageWrapper {
+  background: #FAFAF7;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 10px;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: #F2EDE6;
+  border: 1px solid #E3E7EA;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0px 6px 15px rgba(0,0,0,0.06);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0px 9px 22px rgba(0,0,0,0.09);
+}
+
+.title {
+  color: #2B2B2B;
+  font-size: 26px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.input, select {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  margin: 6px 0 18px 0;
+  border: 1px solid #D5D9DC;
+  background: white;
+  font-size: 15px;
+  color: #2B2B2B;
+  outline: none;
+  transition: border .2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%232B2B2B' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4H4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 13px;
+}
+
+.input:focus, select:focus {
+  border: 1px solid #1A3A8C;
+}
+
+.fileNote {
+  color: #6c6c6c;
+  font-size: 13px;
+}
+
+.fileInput {
+  margin-bottom: 20px;
+}
+
+.button {
+  background: #00246B;
+  width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background .3s ease;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: #1A3A8C;
+}
+
+@media(max-width: 480px) {
+  .card {
+    padding: 20px;
+  }
+  .title {
+    font-size: 22px;
+  }
+}

@@ -1,0 +1,36 @@
+.footer {
+    background: var(--footer);
+    color: white;
+    padding: 1.4rem 1rem;
+    margin-top: 2rem;
+}
+
+.inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.brand strong {
+    font-size: 1.1rem;
+    display: block;
+}
+
+.brand small {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.copy {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+}
+
+.inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.6rem;
+}

@@ -1,62 +1,100 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import styles from "./Signup.module.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useNotification } from "../../Contexts/NotificationContext/NotificationContext";
 
-function Signup() {
+const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfPassword, setShowConfPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { notify } = useNotification();
 
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-
   const validate = () => {
-    const newErrors = {};
+  if (!formData.name.trim()) return "Full name is required";
 
-    if (!formData.name.trim()) newErrors.name = "Name is required";
+  if (!formData.phone.trim()) return "Phone number is required";
 
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "Invalid email format";
+  // Check for non-numeric characters
+  if (!/^[0-9]+$/.test(formData.phone)) 
+    return "Phone number can contain only numbers";
 
-    if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 8)
-      newErrors.password = "Minimum 8 characters";
+  // Check for exact length
+  if (formData.phone.length !== 11)
+    return "Phone number must be exactly 11 digits";
 
-    if (!formData.confirmPassword)
-      newErrors.confirmPassword = "Confirm your password";
-    else if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Passwords do not match";
+  if (!formData.password) return "Password is required";
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  if (formData.password.length < 6)
+    return "Password must be at least 6 characters";
+
+  if (!formData.confirmPassword)
+    return "Please confirm your password";
+
+  if (formData.password !== formData.confirmPassword)
+    return "Passwords do not match";
+
+  return null;
+};
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setSubmitted(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
-      localStorage.setItem("lofloxy_user_email", formData.email);
+    const validation = validate();
+    if (validation) {
+      notify({ message: validation, type: "error" });
+      return;
+    }
 
-      setSubmitted(true);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+    setLoading(true);
+
+    try {
+      const API = import.meta.env.VITE_API_BASE;
+      const form = new FormData();
+      form.append("name", formData.name);
+      form.append("phone", formData.phone);
+      form.append("password", formData.password);
+
+      const res = await fetch(`${API}/signup.php`, {
+        method: "POST",
+        body: form,
       });
-      setErrors({});
+
+      const data = await res.json();
+
+      if (data.status !== "success") {
+        notify({ message: data.message || "Registration failed", type: "error" });
+      } else {
+        notify({ message: "Account created successfully", type: "success" });
+
+        // Reset and redirect
+        setFormData({
+          name: "",
+          phone: "",
+          password: "",
+          confirmPassword: "",
+        });
+
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 900);
+      }
+
+    } catch (err) {
+      notify({ message: "Network error. Please try again.", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,30 +106,30 @@ function Signup() {
           <p className={styles.subtitle}>Start shopping with ease</p>
 
           <form className={styles.form} onSubmit={handleSubmit}>
-            {/* Name */}
+
+            {/* Full Name */}
             <div className={styles.inputGroup}>
-              <label>Name</label>
+              <label>Full Name</label>
               <input
                 type="text"
                 name="name"
+                placeholder="Enter full name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter your full name"
               />
-              {errors.name && <p className={styles.error}>{errors.name}</p>}
             </div>
 
-            {/* Email */}
+            {/* Phone */}
             <div className={styles.inputGroup}>
-              <label>Email</label>
+              <label>Phone Number</label>
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="tel"
+                name="phone"
+                placeholder="Enter phone number"
+                maxLength={11}
+                value={formData.phone}
                 onChange={handleChange}
-                placeholder="Enter your email"
               />
-              {errors.email && <p className={styles.error}>{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -101,9 +139,9 @@ function Signup() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
+                  placeholder="Enter password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter password"
                 />
                 <span
                   className={styles.icon}
@@ -112,7 +150,6 @@ function Signup() {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </span>
               </div>
-              {errors.password && <p className={styles.error}>{errors.password}</p>}
             </div>
 
             {/* Confirm Password */}
@@ -122,9 +159,9 @@ function Signup() {
                 <input
                   type={showConfPassword ? "text" : "password"}
                   name="confirmPassword"
+                  placeholder="Confirm password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  placeholder="Confirm password"
                 />
                 <span
                   className={styles.icon}
@@ -133,16 +170,11 @@ function Signup() {
                   {showConfPassword ? <FaEyeSlash /> : <FaEye />}
                 </span>
               </div>
-              {errors.confirmPassword && (
-                <p className={styles.error}>{errors.confirmPassword}</p>
-              )}
             </div>
 
-            <button className={styles.signupBtn}>Sign Up</button>
-
-            {submitted && (
-              <p className={styles.success}>Account created successfully!</p>
-            )}
+            <button className={styles.signupBtn} disabled={loading}>
+              {loading ? <span className={styles.spinner}></span> : "Sign Up"}
+            </button>
           </form>
 
           <p className={styles.footerText}>
@@ -152,6 +184,6 @@ function Signup() {
       </div>
     </div>
   );
-}
+};
 
 export default Signup;

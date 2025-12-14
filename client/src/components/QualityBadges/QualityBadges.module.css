@@ -1,0 +1,20 @@
+.section{ padding: 0.6rem 0; }
+.inner{ display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+.badge{
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  display:flex;
+  gap:0.6rem;
+  align-items:center;
+  font-weight:600;
+  transition: transform .14s ease;
+  opacity:0; transform:translateY(6px);
+  animation: fadeInUp .28s forwards;
+}
+.badge:hover{ transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+.icon{ font-size: 1.15rem; }
+.label{ color:var(--text); font-size:0.95rem; }
+
+@keyframes fadeInUp{ to { opacity:1; transform: translateY(0); } }

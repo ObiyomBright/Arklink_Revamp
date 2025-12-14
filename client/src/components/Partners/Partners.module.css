@@ -1,0 +1,102 @@
+.section {
+  background: #FAFAF7;
+  padding: 4rem 1.5rem;
+}
+
+.title {
+  text-align: center;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  color: #2B2B2B;
+  margin-bottom: 3rem;
+  letter-spacing: -0.4px;
+}
+
+.grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Each brand card */
+.item {
+  background: #F2EDE6;
+  border: 1px solid #E3E7EA;
+  border-radius: 16px;
+  padding: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+  animation: fadeIn 0.7s ease both;
+}
+
+.item:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+  border-color: #00246B;
+}
+
+/* Logo styling */
+.logo {
+  max-width: 100%;
+  max-height: 60px;
+  object-fit: contain;
+  /* filter: grayscale(100%); */
+  opacity: 0.85;
+  transition:
+    filter 0.35s ease,
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.item:hover .logo {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.26);
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .item {
+    height: 110px;
+    padding: 1.5rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .section {
+    padding: 3rem 1rem;
+  }
+
+  .grid {
+    gap: 1.4rem;
+  }
+
+  .item {
+    height: 100px;
+  }
+
+  .logo {
+    max-height: 50px;
+  }
+}
+
+/* Entrance animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

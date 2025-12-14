@@ -24,8 +24,11 @@ const QuickCategories = () => {
     },
   ];
 
-  return (
-    <div className={styles.wrapper}>
+return (
+  <div className={styles.wrapper}>
+    <h2 className={styles.title}>Our Categories</h2>
+
+    <div className={styles.cardsContainer}>
       {categories.map((cat, index) => (
         <Link key={index} to={cat.link} className={styles.card}>
           <img src={cat.image} alt={cat.name} className={styles.image} />
@@ -33,7 +36,10 @@ const QuickCategories = () => {
         </Link>
       ))}
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default QuickCategories;

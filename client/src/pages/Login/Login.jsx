@@ -51,7 +51,7 @@ const Login = () => {
 
         notify({ message: "Login Successful", type: "success" });
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.href = "/add-product";
         }, 800);
       } else {
         notify({ message: data.message, type: "error" });
@@ -83,7 +83,8 @@ const Login = () => {
               className={styles.input}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              type="number"
+              type="tel"
+              maxLength={11}
               placeholder="Enter phone number"
               required
             />

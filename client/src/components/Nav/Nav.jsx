@@ -29,7 +29,7 @@ export default function Nav() {
       {/* Desktop Links */}
       <ul className={styles.navLinks}>
         <li><Link to="/">Home</Link></li>
-        <li><Link to="">Tiles</Link></li>
+        <li><Link to="/tiles">Tiles</Link></li>
         <li><Link to="">Sanitary Wares</Link></li>
         <li><Link to="">About Us</Link></li>
         <li><Link to="/login">Staff Login</Link></li>
@@ -61,7 +61,7 @@ export default function Nav() {
 
         <ul>
           <li onClick={() => setOpen(false)}><Link to="/">Home</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="">Tiles</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="/tiles">Tiles</Link></li>
           <li onClick={() => setOpen(false)}><Link to="">Sanitary Wares</Link></li>
           <li onClick={() => setOpen(false)}><Link to="">About Us</Link></li>
           <li onClick={() => setOpen(false)}><Link to="/login">Staff Login</Link></li>

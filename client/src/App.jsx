@@ -6,6 +6,7 @@ import Login from './pages/Login/Login';
 import SignUp from './pages/SignUp/SignUp';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import AddProduct from './pages/AddProduct/AddProduct';
+import Tiles from './pages/Tile/Tile';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route path="/add-product" element={<AddProduct />} />
+        <Route path="/tiles" element={<Tiles />} />
 
       </Routes>
     </NotificationProvider>

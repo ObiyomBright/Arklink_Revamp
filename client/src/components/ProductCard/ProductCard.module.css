@@ -40,21 +40,9 @@
   flex-direction: column;
 
   /* FLEX MAGIC FOR WRAPPING */
-  flex: 1 1 260px;
-  max-width: 260px;
+   width: 100%;
+  max-width: 100%;
 }
-
-
-/* ============================
-   MOBILE — FORCE EXACTLY 2 PER ROW
-============================ */
-@media (max-width: 640px) {
-  .card {
-    flex: 0 0 calc(50% - 12px);
-    max-width: calc(50% - 12px);
-  }
-}
-
 
 /* ============================
    PREVIEW AREA

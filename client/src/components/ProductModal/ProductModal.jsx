@@ -15,48 +15,33 @@ export default function ProductModal({
   price,
   image,
   type,
+  company,
+  size,
+  surface_type,
+  pieces_per_carton,
+  sqm_per_carton,
   quantity,
   onClose,
-  onAdd,
   onIncrement,
   onSetQuantity,
 }) {
   useEffect(() => {
-    // close on Escape
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose();
-    };
+    const onKey = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const handleAdd = (e) => {
-    e && e.stopPropagation();
+  const handleAdd = () => {
     addToCart({ id, name, price, image, type });
     updateCartCounter();
-    const cartItem = getCart().find((p) => String(p.id) === String(id));
-    // notify parent to update quantity if provided
-    if (onSetQuantity) onSetQuantity(cartItem ? cartItem.quantity : 1);
-  };
-
-  const handleInc = (delta) => {
-    updateProductQuantity(id, delta);
-    const updated = getCart().find((p) => String(p.id) === String(id));
-    if (onSetQuantity) onSetQuantity(updated ? updated.quantity : 0);
-  };
-
-  const overlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+    const cartItem = getCart().find(p => String(p.id) === String(id));
+    onSetQuantity(cartItem ? cartItem.quantity : 1);
   };
 
   return (
-    <div className={styles.overlay} onClick={overlayClick} role="dialog" aria-modal="true">
+    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
-          <FaTimes />
-        </button>
+        <button className={styles.closeBtn} onClick={onClose}><FaTimes /></button>
 
         <div className={styles.content}>
           <div className={styles.left}>
@@ -65,30 +50,28 @@ export default function ProductModal({
 
           <div className={styles.right}>
             <h2 className={styles.title}>{name}</h2>
+
             <div className={styles.meta}>
-              <span className={styles.type}>{type}</span>
+              <span className={styles.type}>{surface_type}</span>
               <div className={styles.price}>₦{Number(price).toLocaleString()}</div>
             </div>
 
-            <p className={styles.placeholderDesc}>
-              {/* Since there's no description provided, we show a friendly placeholder */}
-              No description available for this product. Tap Add to cart to purchase or change quantity below.
-            </p>
+            {/* 🔥 NEW SPECS SECTION */}
+            <div className={styles.specs}>
+              <div><span>Company</span><strong>{company}</strong></div>
+              <div><span>Size</span><strong>{size}cm</strong></div>
+              <div><span>Pieces / Carton</span><strong>{pieces_per_carton}</strong></div>
+              <div><span>Sqm / Carton</span><strong>{sqm_per_carton}</strong></div>
+            </div>
 
             <div className={styles.controls}>
               <div className={styles.quantityControlModal}>
-                <button className={styles.iconBtnModal} onClick={() => handleInc(-1)} aria-label="Decrease">
-                  <FaMinus />
-                </button>
-
-                <div className={styles.quantityDisplay}>{quantity ?? 0}</div>
-
-                <button className={styles.iconBtnModal} onClick={() => handleInc(1)} aria-label="Increase">
-                  <FaPlus />
-                </button>
+                <button onClick={() => onIncrement(-1)}><FaMinus /></button>
+                <div className={styles.quantityDisplay}>{quantity}</div>
+                <button onClick={() => onIncrement(1)}><FaPlus /></button>
               </div>
 
-              <button className={styles.addBtn} onClick={handleAdd} aria-label="Add to cart">
+              <button className={styles.addBtn} onClick={handleAdd}>
                 <FaShoppingCart /> Add to cart
               </button>
             </div>

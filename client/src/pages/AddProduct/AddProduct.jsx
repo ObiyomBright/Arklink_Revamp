@@ -119,54 +119,63 @@ const AddProduct = () => {
           required
         />
 
-        {productType === "tile" && (
-          <>
-            <label>Surface Type</label>
-            <select
-              name="surface_type"
-              className={styles.selectInput}
-              value={formData.surface_type}
-              onChange={updateField}
-              required
-            >
-              <option value="">Select</option>
-              <option value="matt">Matt</option>
-              <option value="glazed">Glazed</option>
-              <option value="super polished">Super Polished</option>
-            </select>
+     {productType === "tile" && (
+  <>
+    <label>Surface Type</label>
+    <select
+      name="surface_type"
+      className={styles.selectInput}
+      value={formData.surface_type}
+      onChange={updateField}
+      required
+    >
+      <option value="">Select</option>
+      <option value="matt">Matt</option>
+      <option value="glazed">Glazed</option>
+      <option value="super polished">Super Polished</option>
+    </select>
 
-            <label>Size</label>
-            <input
-              type="text"
-              name="size"
-              className={styles.input}
-              value={formData.size}
-              onChange={updateField}
-              required
-            />
+    <label>Size</label>
+    <select
+      name="size"
+      className={styles.selectInput}
+      value={formData.size}
+      onChange={updateField}
+      required
+    >
+      <option value="">Select size</option>
+      <option value="25*40">25×40</option>
+      <option value="25*50">25×50</option>
+      <option value="40*40">40×40</option>
+      <option value="30*60">30×60</option>
+      <option value="30*45">30×45</option>
+      <option value="60*60">60×60</option>
+      <option value="60*120">60×120</option>
+    </select>
 
-            <label>Pieces Per Carton</label>
-            <input
-              type="number"
-              name="pieces_per_carton"
-              className={styles.input}
-              value={formData.pieces_per_carton}
-              onChange={updateField}
-              required
-            />
+    <label>Pieces Per Carton</label>
+    <input
+      type="number"
+      name="pieces_per_carton"
+      className={styles.input}
+      value={formData.pieces_per_carton}
+      onChange={updateField}
+      required
+    />
 
-            <label>Sqm Per Carton</label>
-            <input
-              type="number"
-              name="sqm_per_carton"
-              step="0.01"
-              className={styles.input}
-              value={formData.sqm_per_carton}
-              onChange={updateField}
-              required
-            />
-          </>
-        )}
+    <label>Sqm Per Carton</label>
+    <input
+      type="number"
+      name="sqm_per_carton"
+      step="0.01"
+      className={styles.input}
+      value={formData.sqm_per_carton}
+      onChange={updateField}
+      required
+    />
+  </>
+)}
+
 
         <label>
           {productType === "tile" ? "Price Per Carton (₦)" : "Price Per Item (₦)"}

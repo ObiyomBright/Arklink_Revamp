@@ -100,7 +100,16 @@ if ($product_type === "tile") {
 
     $stmt = $conn->prepare("INSERT INTO tiles (name, company, surface_type, size, pieces_per_carton, sqm_per_carton, price)
 VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssidsd", $name, $company, $surface, $size, $pieces, $sqm, $price);
+$stmt->bind_param(
+    "ssssidd",
+    $name,        // s
+    $company,     // s
+    $surface,     // s
+    $size,        // s  
+    $pieces,      // i
+    $sqm,         // d
+    $price        // d
+);
 
     $stmt->execute();
     $productId = $stmt->insert_id;

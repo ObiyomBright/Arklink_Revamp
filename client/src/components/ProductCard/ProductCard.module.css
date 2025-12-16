@@ -1,7 +1,7 @@
 /* ============================
    PALETTE
 ============================ */
-:root{
+:root {
   --bg: #FAFAF7;
   --text: #2B2B2B;
   --card: #F2EDE6;
@@ -33,14 +33,14 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(11,11,13,0.06);
+  box-shadow: 0 6px 18px rgba(11, 11, 13, 0.06);
   transition: transform .20s ease, box-shadow .20s ease;
 
   display: flex;
   flex-direction: column;
 
   /* FLEX MAGIC FOR WRAPPING */
-   width: 100%;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -65,7 +65,7 @@
   align-items: center;
   justify-content: center;
   height: 180px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.0));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.0));
   border-radius: 8px;
   overflow: hidden;
 }
@@ -74,7 +74,7 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transition: transform .35s cubic-bezier(.2,.9,.2,1);
+  transition: transform .35s cubic-bezier(.2, .9, .2, 1);
   border-radius: 6px;
 }
 
@@ -123,7 +123,7 @@
 
 .excerptText {
   font-size: 0.85rem;
-  color: rgba(43,43,43,0.72);
+  color: rgba(43, 43, 43, 0.72);
   margin: 0;
 }
 
@@ -133,10 +133,10 @@
 ============================ */
 .bottomControls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   padding: 12px;
-  gap: 12px;
   border-top: 1px solid var(--line);
   background: transparent;
 }
@@ -154,8 +154,10 @@
   color: white;
   border: none;
   padding: 8px 12px;
+  width: 100%;
   border-radius: 8px;
   display: inline-flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
   cursor: pointer;
@@ -168,7 +170,9 @@
   transform: translateY(-2px);
 }
 
-.cartIcon { font-size: 0.95rem; }
+.cartIcon {
+  font-size: 0.95rem;
+}
 
 
 /* ============================
@@ -177,11 +181,12 @@
 .quantityControl {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: transparent;
-  border-radius: 8px;
+  gap: 6px;
   border: 1px solid var(--line);
   padding: 6px;
+  border-radius: 8px;
+  flex: 1 1 auto;
+  max-width: 100%;
 }
 
 .iconBtn {
@@ -191,11 +196,14 @@
   border-radius: 6px;
   cursor: pointer;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
 }
 
-.iconBtn:hover { transform: translateY(-1px); }
+.iconBtn:hover {
+  transform: translateY(-1px);
+}
 
 .quantityInput {
   width: 56px;
@@ -205,7 +213,7 @@
   font-weight: 600;
   outline: none;
   background: transparent;
-  -moz-appearance:textfield;
+  -moz-appearance: textfield;
 }
 
 .quantityInput::-webkit-outer-spin-button,
@@ -221,13 +229,26 @@
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 18px 34px rgba(11,11,13,0.09);
+    box-shadow: 0 18px 34px rgba(11, 11, 13, 0.09);
   }
 }
 
 
 /* MOBILE TWEAKS */
 @media (max-width: 420px) {
-  .imageWrap { height: 150px; }
-  .title { font-size: 0.95rem; }
+  .imageWrap {
+    height: 150px;
+  }
+
+  .title {
+    font-size: 0.95rem;
+  }
+
+  .price {
+    font-weight: 700;
+    color: var(--footer);
+    font-size: 0.98rem;
+    flex: 1 1 100%;
+  }
+
 }

@@ -59,9 +59,9 @@ export default function ProductModal({
             {/* 🔥 NEW SPECS SECTION */}
             <div className={styles.specs}>
               <div><span>Company</span><strong>{company}</strong></div>
-              <div><span>Size</span><strong>{size}cm</strong></div>
-              <div><span>Pieces / Carton</span><strong>{pieces_per_carton}</strong></div>
-              <div><span>Sqm / Carton</span><strong>{sqm_per_carton}</strong></div>
+              <div><span>Size</span><strong>{size} &nbsp; cm</strong></div>
+              <div><span>Pieces / Carton</span><strong>{pieces_per_carton}&nbsp; pcs</strong></div>
+              <div><span>Sqm / Carton</span><strong>{sqm_per_carton} &nbsp; m<sup>2</sup></strong></div>
             </div>
 
             <div className={styles.controls}>

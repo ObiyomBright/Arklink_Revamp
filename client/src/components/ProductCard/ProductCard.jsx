@@ -10,6 +10,16 @@ import {
   updateCartCounter,
 } from "../../utils/cartUtils";
 
+/* Fake price increment by tile size */
+const SIZE_PRICE_INCREMENT = {
+  "25*40": 400,
+  "40*40": 500,
+  "30*60": 600,
+  "60*60": 700,
+  "60*120": 1200,
+  "30*45": 750,
+};
+
 const ProductCard = ({
   id,
   name,
@@ -30,6 +40,11 @@ const ProductCard = ({
     setQuantity(cartItem ? cartItem.quantity : 0);
     updateCartCounter();
   }, [id]);
+
+  /* Normalize size & compute fake price */
+  const normalizedSize = size?.replace("x", "*");
+  const increment = SIZE_PRICE_INCREMENT[normalizedSize] || 0;
+  const oldPrice = increment ? Number(price) + increment : null;
 
   const handleAddToCart = (e) => {
     e && e.stopPropagation();
@@ -85,17 +100,31 @@ const ProductCard = ({
         </div>
 
         <div className={styles.bottomControls}>
-          <div className={styles.price}>₦{Number(price).toLocaleString()}</div>
+          <div className={styles.priceWrap}>
+            <span className={styles.price}>
+              ₦{Number(price).toLocaleString()}
+            </span>
+
+            {oldPrice && (
+              <span className={styles.oldPrice}>
+                ₦{oldPrice.toLocaleString()}
+              </span>
+            )}
+          </div>
 
           {quantity > 0 ? (
             <div className={styles.quantityControl}>
-              <button onClick={() => handleIncrement(-1)} className={styles.iconBtn}><FaMinus /></button>
+              <button onClick={() => handleIncrement(-1)} className={styles.iconBtn}>
+                <FaMinus />
+              </button>
               <input
                 className={styles.quantityInput}
                 value={quantity}
                 onChange={(e) => handleAbsoluteQuantity(+e.target.value)}
               />
-              <button onClick={() => handleIncrement(1)} className={styles.iconBtn}><FaPlus /></button>
+              <button onClick={() => handleIncrement(1)} className={styles.iconBtn}>
+                <FaPlus />
+              </button>
             </div>
           ) : (
             <button className={styles.addToCart} onClick={handleAddToCart}>

@@ -219,3 +219,20 @@
     grid-template-columns: 1fr;
   }
 }
+.priceWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mainPrice {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0b0b0d;
+}
+
+.oldPrice {
+  font-size: 0.85rem;
+  color: rgba(11, 11, 13, 0.5);
+  text-decoration: line-through;
+}

@@ -9,6 +9,16 @@ import {
   updateCartCounter,
 } from "../../utils/cartUtils";
 
+/* Fake price increment by tile size */
+const SIZE_PRICE_INCREMENT = {
+  "25*40": 400,
+  "40*40": 500,
+  "30*60": 600,
+  "60*60": 700,
+  "60*120": 1200,
+  "30*45": 750,
+};
+
 export default function ProductModal({
   id,
   name,
@@ -31,6 +41,11 @@ export default function ProductModal({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  /* Normalize size and compute fake price */
+  const normalizedSize = size?.replace("x", "*");
+  const increment = SIZE_PRICE_INCREMENT[normalizedSize] || 0;
+  const oldPrice = increment ? Number(price) + increment : null;
+
   const handleAdd = () => {
     addToCart({ id, name, price, image, type });
     updateCartCounter();
@@ -39,9 +54,14 @@ export default function ProductModal({
   };
 
   return (
-    <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className={styles.overlay}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose}><FaTimes /></button>
+        <button className={styles.closeBtn} onClick={onClose}>
+          <FaTimes />
+        </button>
 
         <div className={styles.content}>
           <div className={styles.left}>
@@ -53,22 +73,52 @@ export default function ProductModal({
 
             <div className={styles.meta}>
               <span className={styles.type}>{surface_type}</span>
-              <div className={styles.price}>₦{Number(price).toLocaleString()}</div>
+
+              {/* ✅ PRICE STACK */}
+              <div className={styles.priceWrap}>
+                <div className={styles.mainPrice}>
+                  ₦{Number(price).toLocaleString()}
+                </div>
+
+                {oldPrice && (
+                  <div className={styles.oldPrice}>
+                    ₦{oldPrice.toLocaleString()}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* 🔥 NEW SPECS SECTION */}
+            {/* SPECS */}
             <div className={styles.specs}>
-              <div><span>Company</span><strong>{company}</strong></div>
-              <div><span>Size</span><strong>{size} &nbsp; cm</strong></div>
-              <div><span>Pieces / Carton</span><strong>{pieces_per_carton}&nbsp; pcs</strong></div>
-              <div><span>Sqm / Carton</span><strong>{sqm_per_carton} &nbsp; m<sup>2</sup></strong></div>
+              <div>
+                <span>Company</span>
+                <strong>{company}</strong>
+              </div>
+              <div>
+                <span>Size</span>
+                <strong>{size} cm</strong>
+              </div>
+              <div>
+                <span>Pieces / Carton</span>
+                <strong>{pieces_per_carton} pcs</strong>
+              </div>
+              <div>
+                <span>Sqm / Carton</span>
+                <strong>
+                  {sqm_per_carton} m<sup>2</sup>
+                </strong>
+              </div>
             </div>
 
             <div className={styles.controls}>
               <div className={styles.quantityControlModal}>
-                <button onClick={() => onIncrement(-1)}><FaMinus /></button>
+                <button onClick={() => onIncrement(-1)}>
+                  <FaMinus />
+                </button>
                 <div className={styles.quantityDisplay}>{quantity}</div>
-                <button onClick={() => onIncrement(1)}><FaPlus /></button>
+                <button onClick={() => onIncrement(1)}>
+                  <FaPlus />
+                </button>
               </div>
 
               <button className={styles.addBtn} onClick={handleAdd}>

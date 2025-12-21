@@ -1,22 +1,50 @@
 <?php
+
+$sessionLifetime = 60 * 60 * 24 * 30;
+
+session_set_cookie_params([
+    'lifetime' => $sessionLifetime,
+    'path' => '/',
+    'secure' => false,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 session_start();
+
 $allowed_origin = "http://localhost:5173";
+
 header("Access-Control-Allow-Origin: $allowed_origin");
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Methods: POST");
-header('Content-Type: application/json; charset=UTF-8');
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Content-Type: application/json");
 
-if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'staff'])) {
-    echo json_encode(["status" => "error", "message" => "Unauthorized access"]);
-    exit();
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+// 🔐 AUTH CHECK
+if (
+    empty($_SESSION['logged_in']) ||
+    !in_array($_SESSION['role'] ?? '', ['admin', 'staff'])
+) {
+    http_response_code(401);
+    exit(json_encode([
+        "status" => "error",
+        "message" => "Unauthorized access"
+    ]));
 }
 
 require_once "config.php";
 
+// ===== REQUEST METHOD =====
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    echo json_encode(["status" => "error", "message" => "Invalid request"]);
-    exit();
+    exit(json_encode([
+        "status" => "error",
+        "message" => "Invalid request"
+    ]));
 }
 
 $product_type = $_POST['product_type'] ?? "";
@@ -100,16 +128,16 @@ if ($product_type === "tile") {
 
     $stmt = $conn->prepare("INSERT INTO tiles (name, company, surface_type, size, pieces_per_carton, sqm_per_carton, price)
 VALUES (?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param(
-    "ssssidd",
-    $name,        // s
-    $company,     // s
-    $surface,     // s
-    $size,        // s  
-    $pieces,      // i
-    $sqm,         // d
-    $price        // d
-);
+    $stmt->bind_param(
+        "ssssidd",
+        $name,        // s
+        $company,     // s
+        $surface,     // s
+        $size,        // s  
+        $pieces,      // i
+        $sqm,         // d
+        $price        // d
+    );
 
     $stmt->execute();
     $productId = $stmt->insert_id;

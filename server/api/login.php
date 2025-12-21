@@ -1,9 +1,29 @@
 <?php
+
+$sessionLifetime = 60 * 60 * 24 * 30;
+
+session_set_cookie_params([
+    'lifetime' => $sessionLifetime,
+    'path' => '/',
+    'secure' => false, // true on HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 session_start();
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Methods: POST");
-header('Content-Type: application/json; charset=UTF-8');
+
+$allowed_origin = "http://localhost:5173";
+
+header("Access-Control-Allow-Origin: $allowed_origin");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 require_once __DIR__ . '/../api/config.php';
 
@@ -13,52 +33,41 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_NUMBER_INT);
-$password = $_POST['password'] ?? null;
-$password = trim($password);
+$password = trim($_POST['password'] ?? '');
 
 if (!$phone || !$password) {
-    exit(json_encode(["status" => "error", "message" => "Phone and password required."]));
-}
-
-if (strlen($phone) !== 11) {
-    exit(json_encode(["status" => "error", "message" => "Invalid phone number format"]));
+    exit(json_encode(["status" => "error", "message" => "Phone and password required"]));
 }
 
 $sql = "SELECT id, full_name, phone, password_hash, role FROM users WHERE phone = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $phone);
-
 $stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+$user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// Check user existence
-if (!$user) {
-    exit(json_encode(["status" => "error", "message" => "User not found"]));
+if (!$user || !password_verify($password, $user['password_hash'])) {
+    exit(json_encode(["status" => "error", "message" => "Invalid credentials"]));
 }
 
-// Verify password
-if (!password_verify($password, $user['password_hash'])) {
-    exit(json_encode(["status" => "error", "message" => "Incorrect password"]));
-}
-
-if ($user['role'] !== 'staff' && $user['role'] !== 'admin') {
-        exit(json_encode(["status" => "error", "message" => "Login is restricted to staff only"]));
+if (!in_array($user['role'], ['admin', 'staff'])) {
+    exit(json_encode(["status" => "error", "message" => "Access denied"]));
 }
 
 session_regenerate_id(true);
-$_SESSION['user_id'] = $user['id'];
-$_SESSION['full_name'] = $user['full_name'];
-$_SESSION['phone'] = $user['phone'];
-$_SESSION['role'] = $user['role'];
-$_SESSION['logged_in'] = true;
-$_SESSION['last_activity'] = time();
 
-exit(json_encode([
+$_SESSION = [
+    'user_id' => $user['id'],
+    'full_name' => $user['full_name'],
+    'phone' => $user['phone'],
+    'role' => $user['role'],
+    'logged_in' => true,
+    'last_activity' => time()
+];
+
+echo json_encode([
     "status" => "success",
-    "message" => "Login successful",
     "full_name" => $user['full_name'],
     "phone" => $user['phone'],
     "role" => $user['role']
-]));
+]);

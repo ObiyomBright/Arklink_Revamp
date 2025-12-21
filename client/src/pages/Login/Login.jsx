@@ -33,6 +33,7 @@ const Login = () => {
       const res = await fetch(`${API}/login.php`, {
         method: "POST",
         body: formData,
+        credentials: "include", 
       });
 
       const data = await res.json();

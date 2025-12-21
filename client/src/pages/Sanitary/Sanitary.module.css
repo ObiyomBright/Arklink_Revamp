@@ -1,0 +1,100 @@
+.wrapper {
+  min-height: 100vh;
+  background: #fafaf7;
+  padding: 1.5rem clamp(1rem, 4vw, 3rem);
+}
+
+.header {
+  margin-top: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 0;
+  text-align: center;
+  animation: fadeDown 0.5s ease forwards;
+}
+
+.header h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 600;
+  color: #1f2937; /* deep neutral */
+  letter-spacing: -0.02em;
+}
+
+.header p {
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+  color: #6b7280; /* soft gray */
+}
+
+/* subtle entrance */
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile polish */
+@media (max-width: 600px) {
+  .header {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .header p {
+    font-size: 0.85rem;
+  }
+}
+
+.grid {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* Fade + lift animation */
+.grid > * {
+  animation: fadeUp 0.35s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile — 2 items */
+@media (max-width: 599px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets */
+@media (min-width: 600px) and (max-width: 899px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Large screens */
+@media (min-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}

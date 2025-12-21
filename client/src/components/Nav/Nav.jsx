@@ -30,7 +30,7 @@ export default function Nav() {
       <ul className={styles.navLinks}>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/tiles">Tiles</Link></li>
-        <li><Link to="">Sanitary Wares</Link></li>
+        <li><Link to="/sanitary">Sanitary Wares</Link></li>
         <li><Link to="">About Us</Link></li>
         <li><Link to="/login">Staff Login</Link></li>
         <li><Link to="">Cart</Link></li>
@@ -62,7 +62,7 @@ export default function Nav() {
         <ul>
           <li onClick={() => setOpen(false)}><Link to="/">Home</Link></li>
           <li onClick={() => setOpen(false)}><Link to="/tiles">Tiles</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="">Sanitary Wares</Link></li>
+          <li onClick={() => setOpen(false)}><Link to="/sanitary">Sanitary Wares</Link></li>
           <li onClick={() => setOpen(false)}><Link to="">About Us</Link></li>
           <li onClick={() => setOpen(false)}><Link to="/login">Staff Login</Link></li>
           <li onClick={() => setOpen(false)}><Link to="">Cart</Link></li>

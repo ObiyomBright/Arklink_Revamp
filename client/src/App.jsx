@@ -7,6 +7,7 @@ import SignUp from './pages/SignUp/SignUp';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import AddProduct from './pages/AddProduct/AddProduct';
 import Tiles from './pages/Tile/Tile';
+import Sanitary from './pages/Sanitary/Sanitary';
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
 
         <Route path="/add-product" element={<AddProduct />} />
         <Route path="/tiles" element={<Tiles />} />
+        <Route path="/sanitary" element={<Sanitary />} />
 
       </Routes>
     </NotificationProvider>

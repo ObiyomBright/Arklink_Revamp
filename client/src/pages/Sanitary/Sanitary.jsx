@@ -3,13 +3,13 @@ import Nav from "../../components/Nav/Nav";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import Spinner from "../../components/Spinner/Spinner";
 import FiltersBar from "../../components/FilterBar/FilterBar";
-import styles from "./Tile.module.css";
+import styles from "./Sanitary.module.css";
 
-const CACHE_KEY = "lofloxy_tiles_cache";
+const CACHE_KEY = "lofloxy_sanitary_cache";
 const LIMIT = 15;
 
-export default function Tiles() {
-  const [tiles, setTiles] = useState([]);
+export default function Sanitary() {
+  const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -19,24 +19,24 @@ export default function Tiles() {
   useEffect(() => {
     const cached = sessionStorage.getItem(CACHE_KEY);
     if (cached) {
-      const { tiles, page, hasMore } = JSON.parse(cached);
-      setTiles(tiles);
+      const { items, page, hasMore } = JSON.parse(cached);
+      setItems(items);
       setPage(page);
       setHasMore(hasMore);
     } else {
-      fetchTiles(1, true);
+      fetchItems(1, true);
     }
   }, []);
 
   useEffect(() => {
     sessionStorage.removeItem(CACHE_KEY);
-    setTiles([]);
+    setItems([]);
     setPage(1);
     setHasMore(true);
-    fetchTiles(1, true);
+    fetchItems(1, true);
   }, [filters]);
 
-  const fetchTiles = async (pageNum, reset = false) => {
+  const fetchItems = async (pageNum, reset = false) => {
     if (loading || (!reset && !hasMore)) return;
 
     setLoading(true);
@@ -47,10 +47,10 @@ export default function Tiles() {
     });
 
     const API = import.meta.env.VITE_API_BASE;
-    const res = await fetch(`${API}/tiles.php?${params}`);
+    const res = await fetch(`${API}/sanitary.php?${params}`);
     const result = await res.json();
 
-    setTiles(prev => {
+    setItems(prev => {
       const map = new Map();
       const combined = reset ? result.data : [...prev, ...result.data];
       combined.forEach(item => map.set(item.id, item));
@@ -66,11 +66,7 @@ export default function Tiles() {
     sessionStorage.setItem(
       CACHE_KEY,
       JSON.stringify({
-        tiles: reset
-          ? result.data
-          : [...tiles, ...result.data].filter(
-              (v, i, a) => a.findIndex(t => t.id === v.id) === i
-            ),
+        items: reset ? result.data : [...items, ...result.data],
         page: nextPage,
         hasMore: more
       })
@@ -81,9 +77,7 @@ export default function Tiles() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        fetchTiles(page);
-      }
+      if (entries[0].isIntersecting) fetchItems(page);
     });
 
     if (loaderRef.current) observer.observe(loaderRef.current);
@@ -93,28 +87,23 @@ export default function Tiles() {
   return (
     <section className={styles.wrapper}>
       <Nav />
-
 <div className={styles.header}>
-  <h1>Tiles Collection</h1>
-  <p>Premium tiles for floors, walls, and modern interiors</p>
+  <h1>Sanitary Catalogue</h1>
+  <p>Quality sanitary wares for modern spaces</p>
 </div>
 
-      <FiltersBar onChange={setFilters} productType="tile"/>
+      <FiltersBar type="sanitary" onChange={setFilters} productType="sanitary" />
 
       <div className={styles.grid}>
-        {tiles.map(tile => (
+        {items.map(item => (
           <ProductCard
-            key={tile.id}
-            id={tile.id}
-            name={tile.name}
-            price={tile.price}
-            image={tile.image}
-            type="Tile"
-            size={tile.size}
-            surfaceType={tile.surface_type}
-            company={tile.company}
-            pieces_per_carton={tile.pieces_per_carton}
-            sqm_per_carton={tile.sqm_per_carton}
+            key={item.id}
+            id={item.id}
+            name={item.name}
+            price={item.price}
+            image={item.image}
+            type="Sanitary"
+            company={item.company}
           />
         ))}
       </div>

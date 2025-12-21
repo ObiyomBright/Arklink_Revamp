@@ -1,40 +1,93 @@
 import React, { useEffect, useState } from "react";
 import styles from "./FilterBar.module.css";
 
-export default function FiltersBar({ onChange }) {
+export default function FiltersBar({ onChange, productType = "tile" }) {
   const [options, setOptions] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const API = import.meta.env.VITE_API_BASE;
-    fetch(`${API}/tiles-filters.php`)
+    const endpoint =
+      productType === "sanitary"
+        ? "sanitary-filter.php"
+        : "tiles-filters.php";
+
+    setLoading(true);
+
+    fetch(`${API}/${endpoint}`)
       .then(res => res.json())
-      .then(setOptions);
-  }, []);
+      .then(data => {
+        setOptions(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [productType]);
+
+  if (loading) {
+    return (
+      <div className={styles.filters}>
+        <div className={styles.skeleton} />
+        <div className={styles.skeleton} />
+        <div className={styles.skeleton} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.filters}>
-      <select onChange={e => onChange(p => ({ ...p, size: e.target.value }))}>
-        <option value="">All Sizes</option>
-        {options.sizes?.map(s => (
-          <option key={s} value={s}>{s}</option>
-        ))}
-      </select>
 
-      <select onChange={e => onChange(p => ({ ...p, surface_type: e.target.value }))}>
-        <option value="">Surface Type</option>
-        {options.surface_types?.map(s => (
-          <option key={s} value={s}>{s}</option>
-        ))}
-      </select>
+      {/* TILE ONLY */}
+      {productType === "tile" && (
+        <select
+          onChange={e =>
+            onChange(prev => ({ ...prev, size: e.target.value }))
+          }
+        >
+          <option value="">All Sizes</option>
+          {options.sizes?.map(size => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+      )}
 
-      <select onChange={e => onChange(p => ({ ...p, company: e.target.value }))}>
+      {/* TILE ONLY */}
+      {productType === "tile" && (
+        <select
+          onChange={e =>
+            onChange(prev => ({ ...prev, surface_type: e.target.value }))
+          }
+        >
+          <option value="">Surface Type</option>
+          {options.surface_types?.map(type => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      )}
+
+      {/* BOTH */}
+      <select
+        onChange={e =>
+          onChange(prev => ({ ...prev, company: e.target.value }))
+        }
+      >
         <option value="">Company</option>
-        {options.companies?.map(c => (
-          <option key={c} value={c}>{c}</option>
+        {options.companies?.map(company => (
+          <option key={company} value={company}>
+            {company}
+          </option>
         ))}
       </select>
 
-      <select onChange={e => onChange(p => ({ ...p, price: e.target.value }))}>
+      {/* BOTH */}
+      <select
+        onChange={e =>
+          onChange(prev => ({ ...prev, price: e.target.value }))
+        }
+      >
         <option value="desc">Price: High → Low</option>
         <option value="asc">Price: Low → High</option>
       </select>

@@ -52,38 +52,76 @@ $name = trim($_POST['name'] ?? "");
 $company = trim($_POST['company'] ?? "");
 $price = trim($_POST['price'] ?? "");
 
-if ($product_type !== "tile" && $product_type !== "sanitary") {
-    echo json_encode(["status" => "error", "message" => "Invalid product type"]);
-    exit();
+if (!in_array($product_type, ['tile', 'sanitary'])) {
+    exit(json_encode(["status" => "error", "message" => "Invalid product type"]));
 }
 
 if ($name === "" || $company === "" || $price === "") {
-    echo json_encode(["status" => "warning", "message" => "Required fields missing"]);
-    exit();
+    exit(json_encode(["status" => "warning", "message" => "Required fields missing"]));
 }
+
+/* =========================================================
+   🔍 CHECK IF PRODUCT ALREADY EXISTS
+========================================================= */
+
+if ($product_type === "tile") {
+    $surface = $_POST['surface_type'] ?? "";
+    $size = $_POST['size'] ?? "";
+
+    $checkStmt = $conn->prepare(
+        "SELECT id FROM tiles 
+         WHERE name = ? AND company = ? AND surface_type = ? AND size = ? 
+         LIMIT 1"
+    );
+    $checkStmt->bind_param("ssss", $name, $company, $surface, $size);
+} else {
+    $checkStmt = $conn->prepare(
+        "SELECT id FROM sanitary 
+         WHERE name = ? AND company = ? 
+         LIMIT 1"
+    );
+    $checkStmt->bind_param("ss", $name, $company);
+}
+
+$checkStmt->execute();
+$checkStmt->store_result();
+
+if ($checkStmt->num_rows > 0) {
+    $checkStmt->close();
+    exit(json_encode([
+        "status" => "warning",
+        "message" => "Product already exists"
+    ]));
+}
+
+$checkStmt->close();
+
+/* =========================================================
+   📷 IMAGE VALIDATION
+========================================================= */
 
 if (!isset($_FILES['image'])) {
-    echo json_encode(["status" => "error", "message" => "Image upload required"]);
-    exit();
+    exit(json_encode(["status" => "error", "message" => "Image upload required"]));
 }
 
-// Image validation
 $image = $_FILES['image'];
 $maxFileSizeMB = 7;
+
 if ($image['size'] > ($maxFileSizeMB * 1024 * 1024)) {
-    echo json_encode(["status" => "error", "message" => "Image exceeds 5MB limit"]);
-    exit();
+    exit(json_encode(["status" => "error", "message" => "Image exceeds 7MB limit"]));
 }
 
-// Determine upload folder
-$uploadFolder = ($product_type === "tile") ? "../uploads/tiles/" : "../uploads/sanitary/";
-if (!file_exists($uploadFolder)) mkdir($uploadFolder, 0777, true);
+$uploadFolder = ($product_type === "tile")
+    ? "../uploads/tiles/"
+    : "../uploads/sanitary/";
 
-// Convert to WebP filename
+if (!file_exists($uploadFolder)) {
+    mkdir($uploadFolder, 0777, true);
+}
+
 $imageName = time() . "_" . rand(1000, 9999) . ".webp";
 $targetFile = $uploadFolder . $imageName;
 
-// Load GD image
 $extension = strtolower(pathinfo($image["name"], PATHINFO_EXTENSION));
 
 switch ($extension) {
@@ -98,11 +136,12 @@ switch ($extension) {
         $source = imagecreatefromwebp($image["tmp_name"]);
         break;
     default:
-        echo json_encode(["status" => "error", "message" => "Invalid image format. Only JPG, PNG, WEBP allowed"]);
-        exit();
+        exit(json_encode([
+            "status" => "error",
+            "message" => "Invalid image format. Only JPG, PNG, WEBP allowed"
+        ]));
 }
 
-// Resize if extremely large (over 1600px width)
 $maxWidth = 1600;
 $width = imagesx($source);
 $height = imagesy($source);
@@ -115,46 +154,54 @@ if ($width > $maxWidth) {
     $source = $resized;
 }
 
-// Save as WebP — Quality 90 (near lossless)
 imagewebp($source, $targetFile, 90);
 imagedestroy($source);
 
-// SAVE TO DATABASE
+/* =========================================================
+   💾 SAVE PRODUCT
+========================================================= */
+
 if ($product_type === "tile") {
-    $surface = $_POST['surface_type'];
-    $size = $_POST['size'];
     $pieces = $_POST['pieces_per_carton'];
     $sqm = $_POST['sqm_per_carton'];
 
-    $stmt = $conn->prepare("INSERT INTO tiles (name, company, surface_type, size, pieces_per_carton, sqm_per_carton, price)
-VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param(
-        "ssssidd",
-        $name,        // s
-        $company,     // s
-        $surface,     // s
-        $size,        // s  
-        $pieces,      // i
-        $sqm,         // d
-        $price        // d
+    $stmt = $conn->prepare(
+        "INSERT INTO tiles 
+        (name, company, surface_type, size, pieces_per_carton, sqm_per_carton, price)
+        VALUES (?, ?, ?, ?, ?, ?, ?)"
     );
 
-    $stmt->execute();
-    $productId = $stmt->insert_id;
-    $stmt->close();
+    $stmt->bind_param(
+        "ssssidd",
+        $name,
+        $company,
+        $surface,
+        $size,
+        $pieces,
+        $sqm,
+        $price
+    );
 } else {
-    $stmt = $conn->prepare("INSERT INTO sanitary (name, company, price) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare(
+        "INSERT INTO sanitary (name, company, price) VALUES (?, ?, ?)"
+    );
     $stmt->bind_param("ssd", $name, $company, $price);
-
-    $stmt->execute();
-    $productId = $stmt->insert_id;
-    $stmt->close();
 }
 
-$stmt2 = $conn->prepare("INSERT INTO product_images (product_type, product_id, local_url) VALUES (?, ?, ?)");
+$stmt->execute();
+$productId = $stmt->insert_id;
+$stmt->close();
+
+$stmt2 = $conn->prepare(
+    "INSERT INTO product_images (product_type, product_id, local_url)
+     VALUES (?, ?, ?)"
+);
 $stmt2->bind_param("sis", $product_type, $productId, $imageName);
 $stmt2->execute();
 $stmt2->close();
 
-echo json_encode(["status" => "success", "message" => "Product added successfully"]);
+echo json_encode([
+    "status" => "success",
+    "message" => "Product added successfully"
+]);
 exit();

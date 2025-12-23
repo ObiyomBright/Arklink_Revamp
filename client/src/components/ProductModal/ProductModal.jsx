@@ -1,5 +1,5 @@
 // src/components/ProductCard/ProductModal.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./ProductModal.module.css";
 import { FaTimes, FaShoppingCart, FaPlus, FaMinus } from "react-icons/fa";
 import {
@@ -35,13 +35,30 @@ export default function ProductModal({
   onIncrement,
   onSetQuantity,
 }) {
+  const modalRef = useRef(null);
+  const contentRef = useRef(null);
+  const [isScrollable, setIsScrollable] = useState(false);
+
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+
+    const checkScrollable = () => {
+      if (contentRef.current) {
+        setIsScrollable(
+          contentRef.current.scrollHeight > contentRef.current.clientHeight
+        );
+      }
+    };
+    checkScrollable();
+    window.addEventListener("resize", checkScrollable);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", checkScrollable);
+    };
   }, [onClose]);
 
-  /* Normalize size and compute fake price */
   const normalizedSize = size?.replace("x", "*");
   const increment = SIZE_PRICE_INCREMENT[normalizedSize] || 0;
   const oldPrice = increment ? Number(price) + increment : null;
@@ -49,8 +66,24 @@ export default function ProductModal({
   const handleAdd = () => {
     addToCart({ id, name, price, image, type });
     updateCartCounter();
-    const cartItem = getCart().find(p => String(p.id) === String(id));
+    const cartItem = getCart().find((p) => String(p.id) === String(id));
     onSetQuantity(cartItem ? cartItem.quantity : 1);
+  };
+
+  const handleInputChange = (val) => {
+    if (val === "") {
+      onSetQuantity(0); // temporarily allow empty input
+    } else {
+      const num = Math.max(0, Number(val));
+      onSetQuantity(num);
+    }
+  };
+
+  const handleBlur = (val) => {
+    if (val === 0) {
+      updateProductQuantity(id, -quantity); // remove from cart
+      onSetQuantity(0);
+    }
   };
 
   return (
@@ -58,12 +91,12 @@ export default function ProductModal({
       className={styles.overlay}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className={styles.modal}>
+      <div className={styles.modal} ref={modalRef}>
         <button className={styles.closeBtn} onClick={onClose}>
           <FaTimes />
         </button>
 
-        <div className={styles.content}>
+        <div className={styles.content} ref={contentRef}>
           <div className={styles.left}>
             <img src={image} alt={name} className={styles.modalImage} />
           </div>
@@ -73,22 +106,16 @@ export default function ProductModal({
 
             <div className={styles.meta}>
               <span className={styles.type}>{surface_type}</span>
-
-              {/* ✅ PRICE STACK */}
               <div className={styles.priceWrap}>
                 <div className={styles.mainPrice}>
                   ₦{Number(price).toLocaleString()}
                 </div>
-
                 {oldPrice && (
-                  <div className={styles.oldPrice}>
-                    ₦{oldPrice.toLocaleString()}
-                  </div>
+                  <div className={styles.oldPrice}>₦{oldPrice.toLocaleString()}</div>
                 )}
               </div>
             </div>
 
-            {/* SPECS */}
             <div className={styles.specs}>
               <div>
                 <span>Company</span>
@@ -112,11 +139,17 @@ export default function ProductModal({
 
             <div className={styles.controls}>
               <div className={styles.quantityControlModal}>
-                <button onClick={() => onIncrement(-1)}>
+                <button className={styles.iconBtnModal} onClick={() => onIncrement(-1)}>
                   <FaMinus />
                 </button>
-                <div className={styles.quantityDisplay}>{quantity}</div>
-                <button onClick={() => onIncrement(1)}>
+                <input
+                  type="number"
+                  className={styles.quantityInputModal}
+                  value={quantity}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  onBlur={() => handleBlur(quantity)}
+                />
+                <button className={styles.iconBtnModal} onClick={() => onIncrement(1)}>
                   <FaPlus />
                 </button>
               </div>
@@ -127,6 +160,13 @@ export default function ProductModal({
             </div>
           </div>
         </div>
+
+        {isScrollable && (
+          <div className={styles.scrollIndicator}>
+            <span className={styles.arrow}>⬇</span>
+            <span className={styles.scrollText}>Scroll</span>
+          </div>
+        )}
       </div>
     </div>
   );

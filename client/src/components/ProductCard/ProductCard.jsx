@@ -33,11 +33,13 @@ const ProductCard = ({
   sqm_per_carton,
 }) => {
   const [quantity, setQuantity] = useState(0);
+  const [tempQuantity, setTempQuantity] = useState(""); // temporary input
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const cartItem = getCart().find(p => String(p.id) === String(id));
+    const cartItem = getCart().find((p) => String(p.id) === String(id));
     setQuantity(cartItem ? cartItem.quantity : 0);
+    setTempQuantity(cartItem ? String(cartItem.quantity) : "");
     updateCartCounter();
   }, [id]);
 
@@ -49,21 +51,35 @@ const ProductCard = ({
   const handleAddToCart = (e) => {
     e && e.stopPropagation();
     addToCart({ id, name, price, image, type });
-    const cartItem = getCart().find(p => String(p.id) === String(id));
+    const cartItem = getCart().find((p) => String(p.id) === String(id));
     setQuantity(cartItem ? cartItem.quantity : 1);
+    setTempQuantity(cartItem ? String(cartItem.quantity) : "1");
   };
 
   const handleIncrement = (delta) => {
     updateProductQuantity(id, delta);
-    const updated = getCart().find(p => String(p.id) === String(id));
+    const updated = getCart().find((p) => String(p.id) === String(id));
     setQuantity(updated ? updated.quantity : 0);
+    setTempQuantity(updated ? String(updated.quantity) : "");
   };
 
-  const handleAbsoluteQuantity = (val) => {
-    if (Number.isNaN(val) || val < 0) return;
-    updateProductQuantity(id, val, { absolute: true });
-    const updated = getCart().find(p => String(p.id) === String(id));
-    setQuantity(updated ? updated.quantity : 0);
+  const handleInputChange = (value) => {
+    setTempQuantity(value); // allow full edit
+  };
+
+  const handleInputBlur = () => {
+    const val = Number(tempQuantity);
+    if (!val || val <= 0) {
+      updateProductQuantity(id, -Infinity); // remove from cart
+      setQuantity(0);
+      setTempQuantity("");
+    } else {
+      const diff = val - quantity;
+      updateProductQuantity(id, diff);
+      const updated = getCart().find((p) => String(p.id) === String(id));
+      setQuantity(updated ? updated.quantity : 0);
+      setTempQuantity(updated ? String(updated.quantity) : "");
+    }
   };
 
   const openModal = () => {
@@ -114,15 +130,22 @@ const ProductCard = ({
 
           {quantity > 0 ? (
             <div className={styles.quantityControl}>
-              <button onClick={() => handleIncrement(-1)} className={styles.iconBtn}>
+              <button
+                onClick={() => handleIncrement(-1)}
+                className={styles.iconBtn}
+              >
                 <FaMinus />
               </button>
               <input
                 className={styles.quantityInput}
-                value={quantity}
-                onChange={(e) => handleAbsoluteQuantity(+e.target.value)}
+                value={tempQuantity}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onBlur={handleInputBlur}
               />
-              <button onClick={() => handleIncrement(1)} className={styles.iconBtn}>
+              <button
+                onClick={() => handleIncrement(1)}
+                className={styles.iconBtn}
+              >
                 <FaPlus />
               </button>
             </div>
@@ -149,7 +172,7 @@ const ProductCard = ({
           quantity={quantity}
           onClose={closeModal}
           onIncrement={handleIncrement}
-          onSetQuantity={handleAbsoluteQuantity}
+          onSetQuantity={(val) => handleAbsoluteQuantity(val)}
         />
       )}
     </>

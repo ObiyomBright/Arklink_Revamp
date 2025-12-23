@@ -8,6 +8,7 @@ import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import AddProduct from './pages/AddProduct/AddProduct';
 import Tiles from './pages/Tile/Tile';
 import Sanitary from './pages/Sanitary/Sanitary';
+import Cart from './pages/Cart/Cart';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/add-product" element={<AddProduct />} />
         <Route path="/tiles" element={<Tiles />} />
         <Route path="/sanitary" element={<Sanitary />} />
+        <Route path="/cart" element={<Cart />} />
 
       </Routes>
     </NotificationProvider>

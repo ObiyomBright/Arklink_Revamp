@@ -9,6 +9,7 @@ import AddProduct from './pages/AddProduct/AddProduct';
 import Tiles from './pages/Tile/Tile';
 import Sanitary from './pages/Sanitary/Sanitary';
 import Cart from './pages/Cart/Cart';
+import AdminOrders from './pages/Orders/Orders';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/tiles" element={<Tiles />} />
         <Route path="/sanitary" element={<Sanitary />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/orders" element={<AdminOrders />} />
 
       </Routes>
     </NotificationProvider>

@@ -1,0 +1,148 @@
+.page {
+  background: #FAFAF7;
+  min-height: 100vh;
+  padding: 1.5rem;
+  color: #2B2B2B;
+}
+
+/* TOP BAR */
+.topBar {
+  max-width: 900px;
+  margin: 0 auto 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.addBtn {
+  background: #00246B;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.addBtn:hover {
+  background: #1A3A8C;
+}
+
+/* LIST */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.empty {
+  color: #666;
+}
+
+/* CARD */
+.card {
+  width: 100%;
+  max-width: 900px;
+  background: #F2EDE6;
+  border: 1px solid #E3E7EA;
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.orderId {
+  font-weight: 600;
+}
+
+.status {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* BODY */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.meta {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.items {
+  border-top: 1px solid #E3E7EA;
+  border-bottom: 1px solid #E3E7EA;
+  padding: 0.75rem 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+.total {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* STATUS UPDATE */
+.statusUpdate {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: #FAFAF7;
+  border-radius: 10px;
+  border: 1px dashed #E3E7EA;
+}
+
+.statusHint {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.4rem;
+}
+
+.select {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #E3E7EA;
+  background: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.select:hover {
+  border-color: #1A3A8C;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .topBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .item {
+    font-size: 0.9rem;
+  }
+}

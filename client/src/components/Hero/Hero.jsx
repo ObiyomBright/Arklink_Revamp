@@ -7,7 +7,7 @@ const Hero = () => {
       
       <h1 className={styles.mainTitle}>
         Luxurious <br />
-        Tile & Sanitary Ware <br />for Every Space
+        Tiles & Sanitary Wares <br />for Every Space
       </h1>
 
       <ul className={styles.briefDescription}>

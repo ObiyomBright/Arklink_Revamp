@@ -2,10 +2,62 @@
   background: #FAFAF7;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 40px 10px;
 }
+
+.topBar {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 1.5rem;
+  padding: 0.9rem 1.2rem;
+  background: #F2EDE6;
+  border: 1px solid #E3E7EA;
+  border-radius: 14px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2B2B2B;
+}
+
+.ordersLink {
+  background: #00246B;
+  color: #ffffff;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.ordersLink:hover {
+  background: #1A3A8C;
+  transform: translateY(-1px);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .topBar {
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: center;
+  }
+
+  .ordersLink {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 
 .card {
   width: 100%;

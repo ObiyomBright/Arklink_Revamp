@@ -4,10 +4,14 @@ import Nav from "../../components/Nav/Nav";
 import ProductModal from "../../components/ProductModal/ProductModal";
 import styles from "./Cart.module.css";
 import { getCart, updateProductQuantity } from "../../utils/cartUtils";
+import { useNotification } from "../../Contexts/NotificationContext/NotificationContext";
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const { notify } = useNotification();
 
   useEffect(() => {
     setCart(getCart());
@@ -23,7 +27,7 @@ export default function Cart() {
     setCart((prev) =>
       prev.map((item) =>
         String(item.id) === String(id)
-          ? { ...item, quantity: value } // allow empty input
+          ? { ...item, quantity: value }
           : item
       )
     );
@@ -34,8 +38,7 @@ export default function Cart() {
     const qty = Number(value);
 
     if (qty <= 0 || isNaN(qty)) {
-      // Remove item from cart if 0 or invalid
-      updateProductQuantity(id, -Infinity); 
+      updateProductQuantity(id, -Infinity);
     } else {
       const item = cart.find((p) => String(p.id) === String(id));
       if (!item) return;
@@ -50,6 +53,80 @@ export default function Cart() {
     (sum, item) => sum + Number(item.price) * item.quantity,
     0
   );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+
+    const phone = e.target.phone?.value?.trim();
+    const address = e.target.address?.value?.trim();
+
+    if (!phone || !address) {
+      notify({
+        message: "Please enter your phone number and delivery address.",
+        type: "warning",
+      });
+      return;
+    }
+
+    if (!cart || cart.length === 0) {
+      notify({
+        message: "Your cart is empty.",
+        type: "warning",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    const items = cart.map((it) => ({
+      id: it.id,
+      type: it.type || it.product_type || "tile",
+      name: it.name,
+      price: Number(it.price),
+      quantity: Number(it.quantity),
+    }));
+
+    try {
+      const API = import.meta.env.VITE_API_BASE || "";
+      const res = await fetch(`${API}/cart.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone,
+          address,
+          items,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data?.success) {
+        localStorage.removeItem("cart");
+        setCart([]);
+        e.target.reset();
+
+        notify({
+          message: `Order placed successfully. You\'ll be contacted shortly by our staff`,
+          type: "success",
+          duration: 4000,
+        });
+      } else {
+        notify({
+          message: data?.message || "Failed to place order. Please try again.",
+          type: "error",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      notify({
+        message: "Network error. Please check your connection and try again.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -120,13 +197,14 @@ export default function Cart() {
               Total: <strong>₦{total.toLocaleString()}</strong>
             </div>
 
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={handleSubmit}>
               <h2 className={styles.formHeader}>Delivery Details</h2>
 
               <div className={styles.formGroup}>
                 <label htmlFor="phone">Phone Number:</label>
                 <input
                   id="phone"
+                  name="phone"
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]{10,15}"
@@ -139,17 +217,24 @@ export default function Cart() {
                 <label htmlFor="address">Delivery Address:</label>
                 <textarea
                   id="address"
+                  name="address"
                   placeholder="Enter your delivery address"
                   required
                 />
               </div>
 
               <p className={styles.note}>
-                You will be contacted shortly by one of our staff to confirm
-                your order.
+                You will be contacted shortly by one of our staff to confirm your
+                order.
               </p>
 
-              <button type="submit">Submit Order</button>
+              <button type="submit" disabled={loading}>
+                {loading ? (
+                  <span className={styles.spinner} />
+                ) : (
+                  "Submit Order"
+                )}
+              </button>
             </form>
           </div>
         )}

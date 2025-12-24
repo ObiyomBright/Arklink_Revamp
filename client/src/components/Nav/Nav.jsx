@@ -23,7 +23,7 @@ export default function Nav() {
     <nav className={styles.navbar}>
       <div className={styles.logo}>
         {/* <img src={Logo} alt="logo" className={styles.logoImage}/> */}
-        <Link to="">Lofloxy</Link>
+        <Link to="">Lofloxy (Arklink)</Link>
       </div>
 
       {/* Desktop Links */}

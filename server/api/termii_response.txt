@@ -1,0 +1,2 @@
+{"status": "error", "code": 401, "message": "Invalid API Key", "link": "/api/send/template"}
+{"status": "error", "code": 401, "message": "Invalid API Key", "link": "/api/send/template"}

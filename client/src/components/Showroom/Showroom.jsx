@@ -3,8 +3,8 @@ import styles from "./Showroom.module.css";
 
 /* Simple static slider - replace with a proper lightbox/carousel if desired */
 const images = [
-  "/assets/show1.webp",
-  "/assets/show2.webp",
+  "../../assets/IMG_20251223_105639.jpg",
+  "../../assets/IMG_20251223_105659.jpg",
   "/assets/show3.webp"
 ];
 

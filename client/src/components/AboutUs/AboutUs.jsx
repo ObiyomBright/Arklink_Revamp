@@ -29,14 +29,14 @@ export default function AboutUs() {
           </div>
         </div>
 
-        <div className={styles.imageWrap}>
+        {/* <div className={styles.imageWrap}>
           <img
             loading="lazy"
             src="/assets/showroom_about.webp"
             alt="Our showroom"
             className={styles.image}
           />
-        </div>
+        </div> */}
       </div>
     </section>
   );

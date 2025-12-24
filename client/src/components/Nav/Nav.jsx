@@ -31,7 +31,7 @@ export default function Nav() {
         <li><Link to="/">Home</Link></li>
         <li><Link to="/tiles">Tiles</Link></li>
         <li><Link to="/sanitary">Sanitary Wares</Link></li>
-        <li><Link to="">About Us</Link></li>
+        {/* <li><Link to="">About Us</Link></li> */}
         <li><Link to="/login">Staff Login</Link></li>
         <li><Link to="/cart">Cart</Link></li>
       </ul>
@@ -63,7 +63,7 @@ export default function Nav() {
           <li onClick={() => setOpen(false)}><Link to="/">Home</Link></li>
           <li onClick={() => setOpen(false)}><Link to="/tiles">Tiles</Link></li>
           <li onClick={() => setOpen(false)}><Link to="/sanitary">Sanitary Wares</Link></li>
-          <li onClick={() => setOpen(false)}><Link to="">About Us</Link></li>
+          {/* <li onClick={() => setOpen(false)}><Link to="">About Us</Link></li> */}
           <li onClick={() => setOpen(false)}><Link to="/login">Staff Login</Link></li>
           <li onClick={() => setOpen(false)}><Link to="/cart">Cart</Link></li>
         </ul>

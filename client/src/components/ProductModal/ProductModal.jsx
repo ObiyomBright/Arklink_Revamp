@@ -86,6 +86,8 @@ export default function ProductModal({
     }
   };
 
+  const isSanitary = type?.toLowerCase() === "sanitary"; // check if product is sanitary
+
   return (
     <div
       className={styles.overlay}
@@ -105,37 +107,50 @@ export default function ProductModal({
             <h2 className={styles.title}>{name}</h2>
 
             <div className={styles.meta}>
-              <span className={styles.type}>{surface_type}</span>
+              {!isSanitary && <span className={styles.type}>{surface_type}</span>}
               <div className={styles.priceWrap}>
                 <div className={styles.mainPrice}>
                   ₦{Number(price).toLocaleString()}
                 </div>
-                {oldPrice && (
+                {oldPrice && !isSanitary && (
                   <div className={styles.oldPrice}>₦{oldPrice.toLocaleString()}</div>
                 )}
               </div>
             </div>
 
-            <div className={styles.specs}>
-              <div>
-                <span>Company</span>
-                <strong>{company}</strong>
+            {/* Only show full specs for non-sanitary items */}
+            {!isSanitary && (
+              <div className={styles.specs}>
+                <div>
+                  <span>Company</span>
+                  <strong>{company}</strong>
+                </div>
+                <div>
+                  <span>Size</span>
+                  <strong>{size} cm</strong>
+                </div>
+                <div>
+                  <span>Pieces / Carton</span>
+                  <strong>{pieces_per_carton} pcs</strong>
+                </div>
+                <div>
+                  <span>Sqm / Carton</span>
+                  <strong>
+                    {sqm_per_carton} m<sup>2</sup>
+                  </strong>
+                </div>
               </div>
-              <div>
-                <span>Size</span>
-                <strong>{size} cm</strong>
+            )}
+
+            {/* For sanitary, only show company */}
+            {isSanitary && (
+              <div className={styles.specs}>
+                <div>
+                  <span>Company</span>
+                  <strong>{company}</strong>
+                </div>
               </div>
-              <div>
-                <span>Pieces / Carton</span>
-                <strong>{pieces_per_carton} pcs</strong>
-              </div>
-              <div>
-                <span>Sqm / Carton</span>
-                <strong>
-                  {sqm_per_carton} m<sup>2</sup>
-                </strong>
-              </div>
-            </div>
+            )}
 
             <div className={styles.controls}>
               <div className={styles.quantityControlModal}>

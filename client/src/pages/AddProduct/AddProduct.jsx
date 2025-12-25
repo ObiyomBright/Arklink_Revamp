@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import styles from "./AddProduct.module.css";
 import { useNotification } from "../../Contexts/NotificationContext/NotificationContext";
 
 const AddProduct = () => {
   const { notify } = useNotification();
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role"); // get user role
 
   const [productType, setProductType] = useState("tile");
   const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ const AddProduct = () => {
 
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const MAX_IMAGE_SIZE_MB = 7;
 
   const handleImageUpload = (e) => {
@@ -92,15 +91,15 @@ const AddProduct = () => {
       <div className={styles.topBar}>
         <h3 className={styles.topTitle}>Admin Panel</h3>
 
+        {/* Admin-only Orders link */}
         {role === "admin" && (
           <Link to="/orders" className={styles.ordersLink}>
             View Orders →
           </Link>
         )}
-
-
       </div>
 
+      {/* Add Product Form */}
       <form className={styles.card} onSubmit={submitProduct}>
         <h2 className={styles.title}>Add Product</h2>
 
@@ -190,7 +189,6 @@ const AddProduct = () => {
             />
           </>
         )}
-
 
         <label>
           {productType === "tile" ? "Price Per Carton (₦)" : "Price Per Item (₦)"}

@@ -2,10 +2,22 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./AddProduct.module.css";
 import { useNotification } from "../../Contexts/NotificationContext/NotificationContext";
+import { convertToJpeg } from "../../utils/convertToJpeg";
+
+const TILE_SIZES = [
+  "25*40",
+  "25*50",
+  "40*40",
+  "30*60",
+  "30*45",
+  "60*60",
+  "80*80",  
+  "60*120",
+];
 
 const AddProduct = () => {
   const { notify } = useNotification();
-  const role = localStorage.getItem("role"); // get user role
+  const role = localStorage.getItem("role");
 
   const [productType, setProductType] = useState("tile");
   const [formData, setFormData] = useState({
@@ -17,22 +29,33 @@ const AddProduct = () => {
     sqm_per_carton: "",
     price: "",
   });
-
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const MAX_IMAGE_SIZE_MB = 7;
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const sizeMB = file.size / (1024 * 1024);
-      if (sizeMB > MAX_IMAGE_SIZE_MB) {
-        notify({ message: `Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`, type: "error" });
-        setImage(null);
-        e.target.value = null;
-        return;
-      }
-      setImage(file);
+    if (!file) return;
+
+    const sizeMB = file.size / (1024 * 1024);
+    if (sizeMB > MAX_IMAGE_SIZE_MB) {
+      notify({
+        message: `Image too large. Max allowed is ${MAX_IMAGE_SIZE_MB}MB`,
+        type: "error",
+      });
+      e.target.value = null;
+      setImage(null);
+      return;
+    }
+
+    try {
+      const jpegFile = await convertToJpeg(file, { maxWidth: 1600, quality: 0.9 });
+      setImage(jpegFile);
+    } catch (err) {
+      notify({ message: "Image conversion failed", type: "error" });
+      setImage(null);
+      e.target.value = null;
     }
   };
 
@@ -87,11 +110,8 @@ const AddProduct = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      {/* Admin Top Bar */}
       <div className={styles.topBar}>
         <h3 className={styles.topTitle}>Admin Panel</h3>
-
-        {/* Admin-only Orders link */}
         {role === "admin" && (
           <Link to="/orders" className={styles.ordersLink}>
             View Orders →
@@ -99,7 +119,6 @@ const AddProduct = () => {
         )}
       </div>
 
-      {/* Add Product Form */}
       <form className={styles.card} onSubmit={submitProduct}>
         <h2 className={styles.title}>Add Product</h2>
 
@@ -158,13 +177,11 @@ const AddProduct = () => {
               required
             >
               <option value="">Select size</option>
-              <option value="25*40">25×40</option>
-              <option value="25*50">25×50</option>
-              <option value="40*40">40×40</option>
-              <option value="30*60">30×60</option>
-              <option value="30*45">30×45</option>
-              <option value="60*60">60×60</option>
-              <option value="60*120">60×120</option>
+              {TILE_SIZES.map((s) => (
+                <option key={s} value={s}>
+                  {s.replace("*", "×")}
+                </option>
+              ))}
             </select>
 
             <label>Pieces Per Carton</label>
@@ -204,11 +221,11 @@ const AddProduct = () => {
         />
 
         <label>
-          Product Image <span className={styles.fileNote}>(Max Size: 7MB)</span>
+          Product Image <span className={styles.fileNote}>(Max Size: 7MB, JPEG/PNG/WEBP)</span>
         </label>
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className={styles.fileInput}
           onChange={handleImageUpload}
           required

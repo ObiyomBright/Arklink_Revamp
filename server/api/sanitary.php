@@ -1,12 +1,13 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: https://lofloxy.store");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
+// Handle preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit;
+    exit();
 }
 
 require_once __DIR__ . "/config.php";
@@ -18,9 +19,10 @@ $offset = ($page - 1) * $limit;
 $company    = $_GET['company'] ?? null;
 $priceOrder = ($_GET['price'] ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
 
+// Base SQL
 $sql = "
 SELECT 
-  s.*,
+  s.id, s.name, s.company, s.price,
   pi.local_url AS image
 FROM sanitary s
 LEFT JOIN product_images pi
@@ -43,23 +45,35 @@ $params[] = $limit;
 $params[] = $offset;
 $types .= "ii";
 
+// Prepare statement
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$params);
+if ($types) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
-$result = $stmt->get_result();
 
-$BASE_IMAGE_URL = "http://localhost/Arklink/server/uploads/sanitary/";
+// Fetch results manually
+$stmt->store_result();
+$stmt->bind_result($id, $name, $comp, $price, $image);
+
+$BASE_IMAGE_URL = "http://lofloxy.store/server/uploads/sanitary/";
 $data = [];
 
-while ($row = $result->fetch_assoc()) {
-    $row['image'] = $row['image']
-        ? $BASE_IMAGE_URL . basename($row['image'])
-        : null;
-    $data[] = $row;
+while ($stmt->fetch()) {
+    $data[] = [
+        "id"      => $id,
+        "name"    => $name,
+        "company" => $comp,
+        "price"   => (float)$price,
+        "image"   => $image ? $BASE_IMAGE_URL . basename($image) : null
+    ];
 }
 
+$stmt->close();
+
 echo json_encode([
-    "page" => $page,
+    "page"  => $page,
     "count" => count($data),
-    "data" => $data
+    "data"  => $data
 ]);
+exit();

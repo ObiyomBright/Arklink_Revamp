@@ -8,22 +8,27 @@ header('Content-Type: application/json; charset=UTF-8');
 require_once __DIR__ . '/../api/config.php';
 
 $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_NUMBER_INT);
-$code = trim($_POST['code'] ?? '');
+$code  = trim($_POST['code'] ?? '');
 
 if (!$phone || !$code) {
     exit(json_encode(["status" => "error", "message" => "Phone and code are required"]));
 }
 
-// Check code
+// Prepare statement
 $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ? AND reset_code = ? LIMIT 1");
+if (!$stmt) {
+    exit(json_encode(["status" => "error", "message" => "Database error: ".$conn->error]));
+}
+
 $stmt->bind_param("ss", $phone, $code);
 $stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$stmt->close();
+$stmt->store_result();
 
-if (!$user) {
+if ($stmt->num_rows === 0) {
+    $stmt->close();
     exit(json_encode(["status" => "error", "message" => "Invalid code"]));
 }
+
+$stmt->close();
 
 exit(json_encode(["status" => "success", "message" => "Code verified"]));

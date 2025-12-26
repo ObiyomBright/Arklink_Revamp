@@ -1,9 +1,11 @@
 <?php
+
+
 // Database configuration
 $host = "localhost";
-$user = "root";
-$password = "";
-$dbname = "arklink";
+$user = "lofloxy2_lofloxy2revamp";
+$password = "lofloxyarklink123";
+$dbname = "lofloxy2_revamp";
 
 // Create connection
 $conn = new mysqli($host, $user, $password, $dbname);
@@ -19,5 +21,4 @@ if ($conn->connect_error) {
 
 // Optional: set charset to avoid encoding issues
 $conn->set_charset("utf8mb4");
-file_put_contents("db_debug.log", "DB connected successfully: " . date("Y-m-d H:i:s") . "\n", FILE_APPEND);
 ?>

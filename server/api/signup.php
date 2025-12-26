@@ -30,13 +30,13 @@ if (strlen($password) < 6) {
     exit(json_encode(["status" => "error", "message" => "Password must be at least 6 characters long."]));
 }
 
-// Check if phone already exists
-$sql_check = "SELECT id FROM users WHERE phone = ? LIMIT 1";
-$stmt_check = $conn->prepare($sql_check);
+// Check if phone already exists (manual fetch)
+$stmt_check = $conn->prepare("SELECT id FROM users WHERE phone = ? LIMIT 1");
 $stmt_check->bind_param("s", $phone);
 $stmt_check->execute();
-$result_check = $stmt_check->get_result();
-if ($result_check->num_rows > 0) {
+$stmt_check->store_result();
+
+if ($stmt_check->num_rows > 0) {
     $stmt_check->close();
     exit(json_encode(["status" => "error", "message" => "Phone number already registered."]));
 }
@@ -46,8 +46,7 @@ $stmt_check->close();
 $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
 // Insert user into database
-$sql_insert = "INSERT INTO users (full_name, phone, password_hash) VALUES (?, ?, ?)";
-$stmt_insert = $conn->prepare($sql_insert);
+$stmt_insert = $conn->prepare("INSERT INTO users (full_name, phone, password_hash) VALUES (?, ?, ?)");
 $stmt_insert->bind_param("sss", $name, $phone, $password_hash);
 
 if ($stmt_insert->execute()) {

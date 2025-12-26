@@ -1,5 +1,8 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:5173");
+// =======================
+// CORS HEADERS
+// =======================
+header("Access-Control-Allow-Origin: https://lofloxy.store");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
@@ -7,18 +10,29 @@ header("Content-Type: application/json");
 // Handle preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit;
+    exit();
 }
 
 require_once "config.php";
 
 $response = [];
 
-$response['companies'] = array_column(
-    $conn
-        ->query("SELECT DISTINCT company FROM sanitary ORDER BY company ASC")
-        ->fetch_all(MYSQLI_ASSOC),
-    'company'
-);
+// =======================
+// Fetch distinct companies
+// =======================
+$sql = "SELECT DISTINCT company FROM sanitary ORDER BY company ASC";
+$result = $conn->query($sql);
+
+if ($result) {
+    $companies = [];
+    while ($row = $result->fetch_assoc()) {
+        $companies[] = $row['company'];
+    }
+    $response['companies'] = $companies;
+} else {
+    http_response_code(500);
+    $response['error'] = "Failed to fetch companies";
+}
 
 echo json_encode($response);
+exit();

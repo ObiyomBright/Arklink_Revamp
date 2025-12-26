@@ -1,7 +1,7 @@
 const faqData = [
   {
     q: "Do you deliver outside Lagos?",
-    a: "Yes — we deliver to all major Nigerian cities. Delivery times vary by location; expect 1-3 days inside Lagos and up to 7 days for some regions."
+    a: "Yes, we deliver to all major Nigerian cities. Delivery times vary by location; expect 1-3 days inside Rivers State and up to 7 days for some regions."
   },
   {
     q: "What payment methods do you accept?",

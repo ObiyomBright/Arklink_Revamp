@@ -1,4 +1,3 @@
-// src/components/ProductCard/ProductModal.jsx
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./ProductModal.module.css";
 import { FaTimes, FaShoppingCart, FaPlus, FaMinus } from "react-icons/fa";
@@ -37,8 +36,16 @@ export default function ProductModal({
 }) {
   const modalRef = useRef(null);
   const contentRef = useRef(null);
-  const [isScrollable, setIsScrollable] = useState(false);
 
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [tempQuantity, setTempQuantity] = useState("");
+
+  /* Sync temp input with real quantity */
+  useEffect(() => {
+    setTempQuantity(quantity > 0 ? String(quantity) : "");
+  }, [quantity]);
+
+  /* Escape key + scroll detection */
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
@@ -50,6 +57,7 @@ export default function ProductModal({
         );
       }
     };
+
     checkScrollable();
     window.addEventListener("resize", checkScrollable);
 
@@ -59,34 +67,46 @@ export default function ProductModal({
     };
   }, [onClose]);
 
+  /* Normalize size & compute fake price */
   const normalizedSize = size?.replace("x", "*");
   const increment = SIZE_PRICE_INCREMENT[normalizedSize] || 0;
   const oldPrice = increment ? Number(price) + increment : null;
 
+  /* Add to cart */
   const handleAdd = () => {
     addToCart({ id, name, price, image, type });
     updateCartCounter();
+
     const cartItem = getCart().find((p) => String(p.id) === String(id));
     onSetQuantity(cartItem ? cartItem.quantity : 1);
+    setTempQuantity(cartItem ? String(cartItem.quantity) : "1");
   };
 
-  const handleInputChange = (val) => {
-    if (val === "") {
-      onSetQuantity(0); // temporarily allow empty input
-    } else {
-      const num = Math.max(0, Number(val));
-      onSetQuantity(num);
-    }
+  /* Editable input handlers (same logic as ProductCard) */
+  const handleInputChange = (value) => {
+    setTempQuantity(value); // allow full typing
   };
 
-  const handleBlur = (val) => {
-    if (val === 0) {
-      updateProductQuantity(id, -quantity); // remove from cart
+  const handleInputBlur = () => {
+    const val = Number(tempQuantity);
+
+    if (!val || val <= 0) {
+      updateProductQuantity(id, -Infinity); // remove from cart
       onSetQuantity(0);
+      setTempQuantity("");
+    } else {
+      const diff = val - quantity;
+      updateProductQuantity(id, diff);
+
+      const updated = getCart().find((p) => String(p.id) === String(id));
+      onSetQuantity(updated ? updated.quantity : 0);
+      setTempQuantity(updated ? String(updated.quantity) : "");
     }
+
+    updateCartCounter();
   };
 
-  const isSanitary = type?.toLowerCase() === "sanitary"; // check if product is sanitary
+  const isSanitary = type?.toLowerCase() === "sanitary";
 
   return (
     <div
@@ -107,19 +127,25 @@ export default function ProductModal({
             <h2 className={styles.title}>{name}</h2>
 
             <div className={styles.meta}>
-              {!isSanitary && <span className={styles.type}>{surface_type}</span>}
+              {!isSanitary && (
+                <span className={styles.type}>{surface_type}</span>
+              )}
+
               <div className={styles.priceWrap}>
                 <div className={styles.mainPrice}>
                   ₦{Number(price).toLocaleString()}
                 </div>
+
                 {oldPrice && !isSanitary && (
-                  <div className={styles.oldPrice}>₦{oldPrice.toLocaleString()}</div>
+                  <div className={styles.oldPrice}>
+                    ₦{oldPrice.toLocaleString()}
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Only show full specs for non-sanitary items */}
-            {!isSanitary && (
+            {/* Specs */}
+            {!isSanitary ? (
               <div className={styles.specs}>
                 <div>
                   <span>Company</span>
@@ -140,10 +166,7 @@ export default function ProductModal({
                   </strong>
                 </div>
               </div>
-            )}
-
-            {/* For sanitary, only show company */}
-            {isSanitary && (
+            ) : (
               <div className={styles.specs}>
                 <div>
                   <span>Company</span>
@@ -152,19 +175,28 @@ export default function ProductModal({
               </div>
             )}
 
+            {/* Controls */}
             <div className={styles.controls}>
               <div className={styles.quantityControlModal}>
-                <button className={styles.iconBtnModal} onClick={() => onIncrement(-1)}>
+                <button
+                  className={styles.iconBtnModal}
+                  onClick={() => onIncrement(-1)}
+                >
                   <FaMinus />
                 </button>
+
                 <input
                   type="number"
                   className={styles.quantityInputModal}
-                  value={quantity}
+                  value={tempQuantity}
                   onChange={(e) => handleInputChange(e.target.value)}
-                  onBlur={() => handleBlur(quantity)}
+                  onBlur={handleInputBlur}
                 />
-                <button className={styles.iconBtnModal} onClick={() => onIncrement(1)}>
+
+                <button
+                  className={styles.iconBtnModal}
+                  onClick={() => onIncrement(1)}
+                >
                   <FaPlus />
                 </button>
               </div>

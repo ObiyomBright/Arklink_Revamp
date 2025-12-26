@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: POST");
@@ -17,26 +18,29 @@ if (!$phone || !preg_match('/^[0-9]{11}$/', $phone)) {
     exit(json_encode(["status" => "error", "message" => "Invalid phone number"]));
 }
 
-// Check if user exists
-$stmt = $conn->prepare("SELECT id FROM users WHERE phone = ? LIMIT 1");
-$stmt->bind_param("s", $phone);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$stmt->close();
+// Escape phone for SQL
+$phoneEsc = $conn->real_escape_string($phone);
 
-if (!$user) {
+// Check if user exists
+$sql = "SELECT id FROM users WHERE phone = '$phoneEsc' LIMIT 1";
+$result = $conn->query($sql);
+
+if (!$result || $result->num_rows === 0) {
     exit(json_encode(["status" => "error", "message" => "Phone number not registered"]));
 }
+
+$user = $result->fetch_assoc();
 
 // Generate 4-digit code
 $code = str_pad(rand(0, 9999), 4, "0", STR_PAD_LEFT);
 
-// Save code in db
-$stmt = $conn->prepare("UPDATE users SET reset_code = ? WHERE phone = ?");
-$stmt->bind_param("ss", $code, $phone);
-$stmt->execute();
-$stmt->close();
+// Save code in db (manual escaping)
+$codeEsc = $conn->real_escape_string($code);
+$updateSql = "UPDATE users SET reset_code = '$codeEsc' WHERE phone = '$phoneEsc'";
+if (!$conn->query($updateSql)) {
+    http_response_code(500);
+    exit(json_encode(["status" => "error", "message" => "Failed to save reset code"]));
+}
 
 // Send code via WhatsApp (Termii)
 $curl = curl_init();
@@ -47,7 +51,7 @@ $data = array(
     "template_id" => "53bf703e-dd3d-4f71-88b2-7b86f4c1c28e",
     "api_key" => "TLIAYKlYbyZwMIPnfdUOgyswysOeyOislkXpBPOqAonILiiTaEDuDZEMYKbMQN",
     "data" => array(
-        "code" => $code, // Send the 4-digit code
+        "code" => $code,
     )
 );
 
@@ -56,7 +60,7 @@ curl_setopt_array($curl, array(
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_ENCODING => '',
     CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
+    CURLOPT_TIMEOUT => 10,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
     CURLOPT_CUSTOMREQUEST => 'POST',

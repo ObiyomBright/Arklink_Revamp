@@ -2,7 +2,7 @@
 // =======================
 // CORS HEADERS (MUST BE FIRST)
 // =======================
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: https://lofloxy.store");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Max-Age: 86400");
@@ -52,43 +52,47 @@ foreach ($items as $item) {
 }
 
 // =======================
+// ESCAPE DATA FOR SQL
+// =======================
+$phoneEsc   = $conn->real_escape_string($phone);
+$addressEsc = $conn->real_escape_string($address);
+
+// =======================
 // TRANSACTION
 // =======================
 $conn->begin_transaction();
 
 try {
     // 1️⃣ Insert order
-    $stmt = $conn->prepare("
+    $insertOrderSql = "
         INSERT INTO orders (phone, delivery_address, total_amount)
-        VALUES (?, ?, ?)
-    ");
-    $stmt->bind_param("ssd", $phone, $address, $total);
-    $stmt->execute();
+        VALUES ('$phoneEsc', '$addressEsc', $total)
+    ";
 
-    $orderId = $stmt->insert_id;
+    if (!$conn->query($insertOrderSql)) {
+        throw new Exception("Order insert failed: " . $conn->error);
+    }
+
+    $orderId = $conn->insert_id;
 
     // 2️⃣ Insert order items
-    $itemStmt = $conn->prepare("
-        INSERT INTO order_items
-        (order_id, product_type, product_id, product_name, price, quantity, item_total)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
-
     foreach ($items as $item) {
-        $itemTotal = (float)$item['price'] * (int)$item['quantity'];
+        $type     = $conn->real_escape_string($item['type']);
+        $id       = intval($item['id']);
+        $name     = $conn->real_escape_string($item['name']);
+        $price    = floatval($item['price']);
+        $quantity = intval($item['quantity']);
+        $itemTotal = $price * $quantity;
 
-        $itemStmt->bind_param(
-            "isissid",
-            $orderId,
-            $item['type'],
-            $item['id'],
-            $item['name'],
-            $item['price'],
-            $item['quantity'],
-            $itemTotal
-        );
+        $insertItemSql = "
+            INSERT INTO order_items
+            (order_id, product_type, product_id, product_name, price, quantity, item_total)
+            VALUES ($orderId, '$type', $id, '$name', $price, $quantity, $itemTotal)
+        ";
 
-        $itemStmt->execute();
+        if (!$conn->query($insertItemSql)) {
+            throw new Exception("Order item insert failed: " . $conn->error);
+        }
     }
 
     // 3️⃣ Send WhatsApp via Termii
@@ -110,9 +114,7 @@ try {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($payload),
-        CURLOPT_HTTPHEADER => [
-            "Content-Type: application/json"
-        ],
+        CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
         CURLOPT_TIMEOUT => 10
     ]);
     curl_exec($curl);
@@ -128,10 +130,9 @@ try {
 
 } catch (Throwable $e) {
     $conn->rollback();
-
     http_response_code(500);
     echo json_encode([
         "success" => false,
-        "message" => "Order failed"
+        "message" => "Order failed: " . $e->getMessage()
     ]);
 }

@@ -1,22 +1,13 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-$sessionLifetime = 60 * 60 * 24 * 30;
-
-session_set_cookie_params([
-    'lifetime' => $sessionLifetime,
-    'path' => '/',
-    'secure' => false,
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
-
-session_start();
-
-$allowed_origin = "http://localhost:5173";
-
+/* ===================== HEADERS & CORS ===================== */
+$allowed_origin = "https://lofloxy.store";
 header("Access-Control-Allow-Origin: $allowed_origin");
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
@@ -25,11 +16,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// 🔐 AUTH CHECK
-if (
-    empty($_SESSION['logged_in']) ||
-    !in_array($_SESSION['role'] ?? '', ['admin', 'staff'])
-) {
+require_once "config.php";
+
+/* ===================== SESSION ===================== */
+$sessionLifetime = 60 * 60 * 24 * 30;
+session_set_cookie_params([
+    'lifetime' => $sessionLifetime,
+    'path' => '/',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_start();
+
+/* ===================== AUTH ===================== */
+if (empty($_SESSION['logged_in']) || !in_array($_SESSION['role'] ?? '', ['admin', 'staff'])) {
     http_response_code(401);
     exit(json_encode([
         "status" => "error",
@@ -37,21 +38,21 @@ if (
     ]));
 }
 
-require_once "config.php";
-
-// ===== REQUEST METHOD =====
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+/* ===================== METHOD CHECK ===================== */
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit(json_encode([
         "status" => "error",
         "message" => "Invalid request"
     ]));
 }
 
+/* ===================== FORM DATA ===================== */
 $product_type = $_POST['product_type'] ?? "";
-$name = trim($_POST['name'] ?? "");
+$name    = trim($_POST['name'] ?? "");
 $company = trim($_POST['company'] ?? "");
-$price = trim($_POST['price'] ?? "");
+$price   = trim($_POST['price'] ?? "");
 
+/* ===================== VALIDATION ===================== */
 if (!in_array($product_type, ['tile', 'sanitary'])) {
     exit(json_encode(["status" => "error", "message" => "Invalid product type"]));
 }
@@ -60,46 +61,47 @@ if ($name === "" || $company === "" || $price === "") {
     exit(json_encode(["status" => "warning", "message" => "Required fields missing"]));
 }
 
-/* =========================================================
-   🔍 CHECK IF PRODUCT ALREADY EXISTS
-========================================================= */
+/* ===================== ESCAPE ===================== */
+$name    = $conn->real_escape_string($name);
+$company = $conn->real_escape_string($company);
+$price   = floatval($price);
 
+/* ===================== DUPLICATE CHECK ===================== */
 if ($product_type === "tile") {
-    $surface = $_POST['surface_type'] ?? "";
-    $size = $_POST['size'] ?? "";
+    $surface = $conn->real_escape_string($_POST['surface_type'] ?? "");
+    $size    = $conn->real_escape_string($_POST['size'] ?? "");
 
-    $checkStmt = $conn->prepare(
-        "SELECT id FROM tiles 
-         WHERE name = ? AND company = ? AND surface_type = ? AND size = ? 
-         LIMIT 1"
-    );
-    $checkStmt->bind_param("ssss", $name, $company, $surface, $size);
+    $checkSql = "
+        SELECT id FROM tiles 
+        WHERE name='$name' 
+          AND company='$company' 
+          AND surface_type='$surface' 
+          AND size='$size'
+        LIMIT 1
+    ";
 } else {
-    $checkStmt = $conn->prepare(
-        "SELECT id FROM sanitary 
-         WHERE name = ? AND company = ? 
-         LIMIT 1"
-    );
-    $checkStmt->bind_param("ss", $name, $company);
+    $checkSql = "
+        SELECT id FROM sanitary 
+        WHERE name='$name' 
+          AND company='$company'
+        LIMIT 1
+    ";
 }
 
-$checkStmt->execute();
-$checkStmt->store_result();
+$checkResult = $conn->query($checkSql);
+if (!$checkResult) {
+    http_response_code(500);
+    exit(json_encode(["status" => "error", "message" => $conn->error]));
+}
 
-if ($checkStmt->num_rows > 0) {
-    $checkStmt->close();
+if ($checkResult->num_rows > 0) {
     exit(json_encode([
         "status" => "warning",
         "message" => "Product already exists"
     ]));
 }
 
-$checkStmt->close();
-
-/* =========================================================
-   📷 IMAGE VALIDATION
-========================================================= */
-
+/* ===================== IMAGE VALIDATION ===================== */
 if (!isset($_FILES['image'])) {
     exit(json_encode(["status" => "error", "message" => "Image upload required"]));
 }
@@ -108,9 +110,22 @@ $image = $_FILES['image'];
 $maxFileSizeMB = 7;
 
 if ($image['size'] > ($maxFileSizeMB * 1024 * 1024)) {
-    exit(json_encode(["status" => "error", "message" => "Image exceeds 7MB limit"]));
+    exit(json_encode([
+        "status" => "error",
+        "message" => "Image exceeds {$maxFileSizeMB}MB limit"
+    ]));
 }
 
+/* ===================== ONLY JPEG ===================== */
+$extension = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+if (!in_array($extension, ['jpg', 'jpeg'])) {
+    exit(json_encode([
+        "status" => "error",
+        "message" => "Only JPEG images are allowed"
+    ]));
+}
+
+/* ===================== UPLOAD PATH ===================== */
 $uploadFolder = ($product_type === "tile")
     ? "../uploads/tiles/"
     : "../uploads/sanitary/";
@@ -119,89 +134,63 @@ if (!file_exists($uploadFolder)) {
     mkdir($uploadFolder, 0777, true);
 }
 
-$imageName = time() . "_" . rand(1000, 9999) . ".webp";
+/* ===================== IMAGE NAME ===================== */
+$imageName  = time() . "_" . rand(1000, 9999) . ".jpg";
 $targetFile = $uploadFolder . $imageName;
 
-$extension = strtolower(pathinfo($image["name"], PATHINFO_EXTENSION));
-
-switch ($extension) {
-    case 'jpg':
-    case 'jpeg':
-        $source = imagecreatefromjpeg($image["tmp_name"]);
-        break;
-    case 'png':
-        $source = imagecreatefrompng($image["tmp_name"]);
-        break;
-    case 'webp':
-        $source = imagecreatefromwebp($image["tmp_name"]);
-        break;
-    default:
-        exit(json_encode([
-            "status" => "error",
-            "message" => "Invalid image format. Only JPG, PNG, WEBP allowed"
-        ]));
+/* ===================== MOVE FILE ===================== */
+if (!move_uploaded_file($image['tmp_name'], $targetFile)) {
+    exit(json_encode([
+        "status" => "error",
+        "message" => "Failed to save image"
+    ]));
 }
 
-$maxWidth = 1600;
-$width = imagesx($source);
-$height = imagesy($source);
-
-if ($width > $maxWidth) {
-    $newWidth = $maxWidth;
-    $newHeight = floor($height * ($newWidth / $width));
-    $resized = imagecreatetruecolor($newWidth, $newHeight);
-    imagecopyresampled($resized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-    $source = $resized;
-}
-
-imagewebp($source, $targetFile, 90);
-imagedestroy($source);
-
-/* =========================================================
-   💾 SAVE PRODUCT
-========================================================= */
-
+/* ===================== INSERT PRODUCT ===================== */
 if ($product_type === "tile") {
-    $pieces = $_POST['pieces_per_carton'];
-    $sqm = $_POST['sqm_per_carton'];
+    $pieces = intval($_POST['pieces_per_carton'] ?? 0);
+    $sqm    = floatval($_POST['sqm_per_carton'] ?? 0);
 
-    $stmt = $conn->prepare(
-        "INSERT INTO tiles 
+    $insertSql = "
+        INSERT INTO tiles 
         (name, company, surface_type, size, pieces_per_carton, sqm_per_carton, price)
-        VALUES (?, ?, ?, ?, ?, ?, ?)"
-    );
-
-    $stmt->bind_param(
-        "ssssidd",
-        $name,
-        $company,
-        $surface,
-        $size,
-        $pieces,
-        $sqm,
-        $price
-    );
+        VALUES
+        ('$name','$company','$surface','$size',$pieces,$sqm,$price)
+    ";
 } else {
-    $stmt = $conn->prepare(
-        "INSERT INTO sanitary (name, company, price) VALUES (?, ?, ?)"
-    );
-    $stmt->bind_param("ssd", $name, $company, $price);
+    $insertSql = "
+        INSERT INTO sanitary (name, company, price)
+        VALUES ('$name','$company',$price)
+    ";
 }
 
-$stmt->execute();
-$productId = $stmt->insert_id;
-$stmt->close();
+if (!$conn->query($insertSql)) {
+    http_response_code(500);
+    exit(json_encode([
+        "status" => "error",
+        "message" => $conn->error
+    ]));
+}
 
-$stmt2 = $conn->prepare(
-    "INSERT INTO product_images (product_type, product_id, local_url)
-     VALUES (?, ?, ?)"
-);
-$stmt2->bind_param("sis", $product_type, $productId, $imageName);
-$stmt2->execute();
-$stmt2->close();
+$productId = $conn->insert_id;
 
+/* ===================== INSERT IMAGE ===================== */
+$insertImageSql = "
+    INSERT INTO product_images (product_type, product_id, local_url)
+    VALUES ('$product_type', $productId, '$imageName')
+";
+
+if (!$conn->query($insertImageSql)) {
+    http_response_code(500);
+    exit(json_encode([
+        "status" => "error",
+        "message" => $conn->error
+    ]));
+}
+
+/* ===================== SUCCESS ===================== */
 echo json_encode([
     "status" => "success",
     "message" => "Product added successfully"
 ]);
-exit();
+exit;

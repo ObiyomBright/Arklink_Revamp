@@ -8,8 +8,8 @@ const faqData = [
     a: "We accept bank transfers, card payments via our payment gateway, and limited cash-on-delivery where available."
   },
   {
-    q: "What is your return policy?",
-    a: "Report damaged or wrong items within 48 hours of delivery for a replacement or refund. Some sanitary wares are covered by manufacturer warranty."
+    q: "Do you supply to retailers at wholesale prices?",
+    a: "Yes, we supply to retailers at wholesale prices."
   },
   {
     q: "Are your products original?",

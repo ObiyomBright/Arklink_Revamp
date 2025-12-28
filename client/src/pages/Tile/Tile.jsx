@@ -111,7 +111,7 @@ export default function Tiles() {
             image={tile.image}
             type="Tile"
             size={tile.size}
-            surfaceType={tile.surface_type}
+            surface_type  ={tile.surface_type}
             company={tile.company}
             pieces_per_carton={tile.pieces_per_carton}
             sqm_per_carton={tile.sqm_per_carton}
